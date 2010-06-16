@@ -3,28 +3,29 @@
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent" android:background="@drawable/gas_pump">
 
-	<TextView android:id="@+id/logo" android:text="Goedkoop Tanken"
+	<TextView android:id="@+id/logo" android:text="@string/app_name"
 		android:textSize="16pt" android:gravity="center_horizontal"
 		android:layout_height="wrap_content" android:layout_width="fill_parent"
-		android:padding="3dip" android:textColor="#00ff00"
+		android:padding="3dip" android:textColor="#ffffff"
 		android:layout_weight="1" />
 
 	<Button android:id="@+id/gpsButton" android:text="@string/gpsButton_text"
 		android:textSize="12pt" android:gravity="center_horizontal"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
 		android:drawableLeft="@drawable/satellite_icon"
-		android:drawablePadding="3dip" android:padding="3dip"
-		android:layout_margin="3dip" />
-
-	<Button android:id="@+id/postcodeButton" android:text="@string/postcodeButton_text"
-		android:textSize="12pt" android:gravity="center_horizontal"
-		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:drawablePadding="3dip" android:padding="10dip"
+		android:layout_margin="10dip" />
+	<!--
+		<Button android:id="@+id/postcodeButton"
+		android:text="@string/postcodeButton_text" android:textSize="12pt"
+		android:gravity="center_horizontal" android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
 		android:drawableLeft="@drawable/sent_mail_icon"
-		android:drawablePadding="3dip" android:padding="3dip"
-		android:layout_margin="3dip" />
-
-	<EditText android:id="@+id/postcode" android:maxLength="4"
-		android:inputType="number" android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:layout_margin="3dip" />
+		android:drawablePadding="3dip" android:padding="10dip"
+		android:layout_margin="10dip" /> <EditText android:id="@+id/postcode"
+		android:maxLength="4" android:inputType="number"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_margin="10dip" />
+	-->
 
 </LinearLayout>
