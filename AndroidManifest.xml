@@ -11,7 +11,8 @@
 			</intent-filter>
 		</activity>
 		<activity android:name=".PlacesActivity" android:label="@string/results_label" />
+		<activity android:name=".PlacesListActivity" />
+		<activity android:name=".PlacesMapActivity"  />
 	</application>
 	<uses-sdk android:minSdkVersion="4" />
-
 </manifest> 
