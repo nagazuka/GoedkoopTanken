@@ -9,16 +9,24 @@
 		android:padding="3dip" android:textColor="#ffffff"
 		android:layout_weight="1" />
 
-	<ImageView android:id="@+id/splash" android:src="@drawable/gas_pump"
+	<ImageView android:id="@+id/splash" android:src="@drawable/img_fuel_gauge"
 		android:layout_weight="1" android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:scaleType="center"/>
+		android:layout_height="wrap_content" android:scaleType="center"
+		android:layout_marginBottom="10dip" android:layout_marginLeft="10dip"
+		android:layout_marginRight="10dip" />
+
+	<Spinner android:id="@+id/spinner" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:drawSelectorOnTop="true"
+		android:prompt="@string/gastype_prompt" android:padding="10dip"
+		android:layout_marginLeft="10dip" android:layout_marginRight="10dip" />
 
 	<Button android:id="@+id/gpsButton" android:text="@string/gpsButton_text"
 		android:textSize="12pt" android:gravity="center_horizontal"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:drawableLeft="@drawable/satellite_icon"
+		android:drawableLeft="@drawable/ic_gps_satellite"
 		android:drawablePadding="3dip" android:padding="10dip"
-		android:layout_margin="10dip" />
+		android:layout_marginBottom="10dip" android:layout_marginLeft="10dip"
+		android:layout_marginRight="10dip" />
 	<!--
 		<Button android:id="@+id/postcodeButton"
 		android:text="@string/postcodeButton_text" android:textSize="12pt"

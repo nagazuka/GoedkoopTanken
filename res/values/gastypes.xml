@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="gastypes">
+        <item>Euro 95</item>
+        <item>Diesel</item>
+        <item>Super</item>
+        <item>Super Plus</item>
+    </string-array>
+</resources>

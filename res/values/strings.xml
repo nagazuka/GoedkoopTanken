@@ -6,4 +6,5 @@
 	<string name="results_label">Zoekresultaten</string>
 	<string name="progressdialog_title">Locatie bepalen</string>
 	<string name="progressdialog_cancel">Annuleren</string>
+	<string name="gastype_prompt">Kies een brandstof</string>
 </resources>

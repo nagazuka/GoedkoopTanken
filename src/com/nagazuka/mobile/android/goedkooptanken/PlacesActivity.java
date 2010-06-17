@@ -26,7 +26,7 @@ public class PlacesActivity extends TabActivity {
 		switch (id) {
 		case DIALOG_PROGRESS:
 			mProgressDialog = new ProgressDialog(PlacesActivity.this);
-			mProgressDialog.setIcon(R.drawable.icon);
+			mProgressDialog.setIcon(R.drawable.ic_gps_satellite);
 			mProgressDialog.setTitle(R.string.progressdialog_title);
 			mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 			mProgressDialog.setMax(MAX_PROGRESS);
@@ -83,14 +83,14 @@ public class PlacesActivity extends TabActivity {
 		intent = new Intent().setClass(this, PlacesListActivity.class);
 
 		// Initialize a TabSpec for each tab and add it to the TabHost
-		spec = tabHost.newTabSpec("list").setIndicator("Artists",
-				res.getDrawable(R.drawable.ic_tab_icons)).setContent(intent);
+		spec = tabHost.newTabSpec("list").setIndicator("Lijst",
+				res.getDrawable(R.drawable.ic_tab_list_icons)).setContent(intent);
 		tabHost.addTab(spec);
 
 		// Do the same for the other tabs
 		intent = new Intent().setClass(this, PlacesMapActivity.class);
-		spec = tabHost.newTabSpec("map").setIndicator("Albums",
-				res.getDrawable(R.drawable.ic_tab_icons)).setContent(intent);
+		spec = tabHost.newTabSpec("map").setIndicator("Kaart",
+				res.getDrawable(R.drawable.ic_tab_map_icons)).setContent(intent);
 		tabHost.addTab(spec);
 
 		tabHost.setCurrentTab(0);
