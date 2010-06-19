@@ -52,8 +52,10 @@ public class PlacesActivity extends TabActivity {
 
 		// Progress bar initialization
 
-		showDialog(DIALOG_PROGRESS);
-		mProgress = 0;
+		if (mProgress == 0) {
+			showDialog(DIALOG_PROGRESS);
+		}
+
 		mProgressDialog.setProgress(mProgress);
 
 		mProgressHandler = new Handler() {
@@ -65,7 +67,7 @@ public class PlacesActivity extends TabActivity {
 				} else {
 					mProgress++;
 					mProgressDialog.incrementProgressBy(1);
-					mProgressHandler.sendEmptyMessageDelayed(0, 100);
+					mProgressHandler.sendEmptyMessageDelayed(0, 10);
 				}
 			}
 		};
@@ -84,13 +86,15 @@ public class PlacesActivity extends TabActivity {
 
 		// Initialize a TabSpec for each tab and add it to the TabHost
 		spec = tabHost.newTabSpec("list").setIndicator("Lijst",
-				res.getDrawable(R.drawable.ic_tab_list_icons)).setContent(intent);
+				res.getDrawable(R.drawable.ic_tab_list_icons)).setContent(
+				intent);
 		tabHost.addTab(spec);
 
 		// Do the same for the other tabs
 		intent = new Intent().setClass(this, PlacesMapActivity.class);
 		spec = tabHost.newTabSpec("map").setIndicator("Kaart",
-				res.getDrawable(R.drawable.ic_tab_map_icons)).setContent(intent);
+				res.getDrawable(R.drawable.ic_tab_map_icons))
+				.setContent(intent);
 		tabHost.addTab(spec);
 
 		tabHost.setCurrentTab(0);
