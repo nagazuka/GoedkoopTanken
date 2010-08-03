@@ -1,5 +1,6 @@
 package com.nagazuka.mobile.android.goedkooptanken;
 
+import java.util.Collections;
 import java.util.List;
 
 import android.content.Context;
@@ -13,9 +14,18 @@ public class PlacesAdapter extends ArrayAdapter<Place> {
 
     private List<Place> items;
 
-    public PlacesAdapter(Context context, int textViewResourceId, List<Place> items) {
+    public List<Place> getItems() {
+		return items;
+	}
+
+	private void setItems(List<Place> items) {
+		Collections.sort(items);
+		this.items = items;
+	}
+
+	public PlacesAdapter(Context context, int textViewResourceId, List<Place> items) {
             super(context, textViewResourceId, items);
-            this.items = items;
+            this.setItems(items);                      
     }
 
     @Override
@@ -27,13 +37,19 @@ public class PlacesAdapter extends ArrayAdapter<Place> {
             }
             Place p = items.get(position);
             if (p != null) {
-                    TextView tt = (TextView) v.findViewById(R.id.toptext);
-                    TextView bt = (TextView) v.findViewById(R.id.bottomtext);
+                    TextView tt = (TextView) v.findViewById(R.id.nametext);
+                    TextView bt = (TextView) v.findViewById(R.id.addresstext);
+                    TextView pt = (TextView) v.findViewById(R.id.pricetext);
                     if (tt != null) {
-                          tt.setText("Name: "+p.getName());                            }
+                          tt.setText(p.getName());                            }
                     if(bt != null){
-                          bt.setText("Address: "+ p.getAddress());
+                          bt.setText(p.getAddress());
                     }
+                    if(pt != null){
+                    	String price = String.format("%.2f", p.getPrice());
+                        pt.setText(price);
+                  }
+                    
             }
             return v;
     }

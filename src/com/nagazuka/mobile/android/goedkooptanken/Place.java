@@ -1,13 +1,13 @@
 package com.nagazuka.mobile.android.goedkooptanken;
 
-public class Place {
+public class Place implements Comparable<Place> {
 	private double price = 0.0;
 	private String name = "";
 	private String address = "";
-	
+
 	public Place() {
 	}
-	
+
 	public Place(String name, String address, double price) {
 		super();
 		this.price = price;
@@ -37,5 +37,10 @@ public class Place {
 
 	public void setAddress(String address) {
 		this.address = address;
+	}
+
+	@Override
+	public int compareTo(Place another) {
+		return (int) (this.getPrice() * 100 - another.getPrice() * 100);
 	}
 }
