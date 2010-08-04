@@ -6,6 +6,7 @@ import android.app.TabActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -16,9 +17,7 @@ public class PlacesActivity extends TabActivity {
 	private static final int DIALOG_PROGRESS = 1;
 	private static int MAX_PROGRESS = 100;
 
-	private int mProgress;
 	private ProgressDialog mProgressDialog;
-	private Handler mProgressHandler;
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
@@ -50,32 +49,9 @@ public class PlacesActivity extends TabActivity {
 
 		setContentView(R.layout.places);
 
-		// Progress bar initialization
-
-		if (mProgress == 0) {
-			showDialog(DIALOG_PROGRESS);
-		}
-
-		mProgressDialog.setProgress(mProgress);
-
-		mProgressHandler = new Handler() {
-			@Override
-			public void handleMessage(Message msg) {
-				super.handleMessage(msg);
-				if (mProgress >= MAX_PROGRESS) {
-					mProgressDialog.dismiss();
-				} else {
-					mProgress++;
-					mProgressDialog.incrementProgressBy(1);
-					mProgressHandler.sendEmptyMessageDelayed(0, 10);
-				}
-			}
-		};
-
-		mProgressHandler.sendEmptyMessage(0);
+		new LocationTask().execute("Euro 95");
 
 		// Tab initialization
-
 		Resources res = getResources(); // Resource object to get Drawables
 		TabHost tabHost = getTabHost(); // The activity TabHost
 		TabHost.TabSpec spec; // Resusable TabSpec for each tab
@@ -98,6 +74,40 @@ public class PlacesActivity extends TabActivity {
 		tabHost.addTab(spec);
 
 		tabHost.setCurrentTab(0);
+	}
+
+	private class LocationTask extends AsyncTask<String, Integer, String> {
+		private int mProgress;
+
+		@Override
+		public void onPreExecute() {
+			mProgress = 0;
+			showDialog(DIALOG_PROGRESS);
+			mProgressDialog.setProgress(mProgress);
+
+		}
+
+		@Override
+		protected String doInBackground(String... arg0) {
+			for (int i = 1; i <= MAX_PROGRESS; i++) {
+				mProgress++;
+				publishProgress(mProgress);
+			}
+			return "23L440N";
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... progress) {
+			mProgressDialog.setProgress(progress[0]);
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			mProgress = MAX_PROGRESS;
+			mProgressDialog.setProgress(mProgress);
+			mProgressDialog.dismiss();
+		}
+
 	}
 
 }
