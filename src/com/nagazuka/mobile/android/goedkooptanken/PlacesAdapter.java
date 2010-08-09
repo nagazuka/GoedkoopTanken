@@ -51,6 +51,8 @@ public class PlacesAdapter extends ArrayAdapter<Place> {
                   }
                     
             }
+            
+           
             return v;
     }
 }

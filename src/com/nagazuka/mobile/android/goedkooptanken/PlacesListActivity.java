@@ -8,6 +8,8 @@ import java.util.Random;
 import android.app.ListActivity;
 import android.os.Bundle;
 import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 
 public class PlacesListActivity extends ListActivity {
 	private ListAdapter m_adapter;
@@ -17,12 +19,25 @@ public class PlacesListActivity extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		m_places = getDummyPlaces();
+		String fuelChoice = getIntent().getStringExtra(
+				PlacesConstants.INTENT_EXTRA_FUEL_CHOICE);
+		String postalCode = getIntent().getStringExtra(
+				PlacesConstants.INTENT_EXTRA_POSTAL_CODE);
 
+		ListView listView = getListView();
+		listView.setTextFilterEnabled(true);
+
+		TextView textView = new TextView(getApplicationContext());
+		textView.setText("Resultaten voor " + fuelChoice + " in postcode "
+				+ postalCode + ":");
+		
+		listView.addHeaderView(textView, null, false);
+
+		m_places = getDummyPlaces();
 		m_adapter = new PlacesAdapter(this, R.layout.row, m_places);
+
 		setListAdapter(m_adapter);
 
-		getListView().setTextFilterEnabled(true);
 	}
 
 	private static List<Place> getDummyPlaces() {
@@ -31,7 +46,7 @@ public class PlacesListActivity extends ListActivity {
 		for (int i = 0; i < GAS_STATIONS.length; i++) {
 			double price = 1.40 + 0.5 * generator.nextDouble();
 			res.add(new Place(GAS_STATIONS[i], ADDRESSES[i], price));
-		}		
+		}
 		return res;
 	}
 

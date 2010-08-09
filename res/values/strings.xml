@@ -4,6 +4,7 @@
 	<string name="gpsButton_text">Zoeken in de buurt</string>
 	<string name="postcodeButton_text">Zoeken op postcode</string>
 	<string name="results_label">Zoekresultaten</string>
+	<string name="map_label">Kaart</string>
 	<string name="progressdialog_title">Locatie bepalen</string>
 	<string name="progressdialog_cancel">Annuleren</string>
 	<string name="gastype_prompt">Kies een brandstof</string>
