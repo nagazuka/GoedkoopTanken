@@ -76,9 +76,8 @@ public class PlacesListActivity extends ListActivity {
 
 		listView.addHeaderView(m_headerView, null, false);
 
-		m_places = getDummyPlaces();
+		m_places = new ArrayList<Place>();
 		m_adapter = new PlacesAdapter(this, R.layout.row, m_places);
-		
 
 		setListAdapter(m_adapter);
 		
@@ -86,12 +85,13 @@ public class PlacesListActivity extends ListActivity {
 	}
 
 	private static List<Place> getDummyPlaces() {
-		List<Place> res = new ArrayList<Place>();
+		ArrayList<Place> res = new ArrayList<Place>();
 		Random generator = new Random();
 		for (int i = 0; i < GAS_STATIONS.length; i++) {
 			double price = 1.40 + 0.5 * generator.nextDouble();
 			res.add(new Place(GAS_STATIONS[i], ADDRESSES[i], price));
 		}
+		Collections.sort(res);
 		return res;
 	}
 
