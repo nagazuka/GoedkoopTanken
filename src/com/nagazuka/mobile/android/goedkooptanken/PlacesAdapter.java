@@ -20,12 +20,12 @@ public class PlacesAdapter extends ArrayAdapter<Place> {
 
 	private void setItems(List<Place> items) {
 		Collections.sort(items);
-		this.items = items;
+		this.items = items;		
 	}
 
 	public PlacesAdapter(Context context, int textViewResourceId, List<Place> items) {
             super(context, textViewResourceId, items);
-            this.setItems(items);                      
+            this.setItems(items);            
     }
 
     @Override

@@ -12,7 +12,6 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -20,7 +19,7 @@ public class PlacesListActivity extends ListActivity {
 	
 	private static final String TAG = "PlacesListActivity";
 	
-	private ListAdapter m_adapter;
+	private PlacesAdapter m_adapter;
 	private ProgressDialog m_progressDialog;
 	private TextView m_headerView;
 
@@ -79,6 +78,7 @@ public class PlacesListActivity extends ListActivity {
 
 		m_places = getDummyPlaces();
 		m_adapter = new PlacesAdapter(this, R.layout.row, m_places);
+		
 
 		setListAdapter(m_adapter);
 		
@@ -144,7 +144,9 @@ public class PlacesListActivity extends ListActivity {
 		@Override
 		protected void onPostExecute(List<Place> result) {
 			Log.d(TAG, "<< DownloadTask: result size = "+ result.size() + ">>");
-			//m_places.addAll(result);
+			
+			m_places.addAll(result);
+			m_adapter.notifyDataSetChanged();
 		}
 	}
 
