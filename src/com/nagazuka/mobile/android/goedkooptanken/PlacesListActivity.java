@@ -124,6 +124,13 @@ public class PlacesListActivity extends ListActivity {
 			Criteria criteria = new Criteria();
 			criteria.setAccuracy(Criteria.ACCURACY_FINE);
 			String provider = m_locationManager.getBestProvider(criteria, true);
+			Log.d(TAG, "<< bestProvider: " + provider + ">>");
+
+			// Could be that GPS is not enabled or not available on device
+			if (provider == null) {
+				return "";
+			}
+
 			Location location = m_locationManager
 					.getLastKnownLocation(provider);
 
@@ -138,6 +145,7 @@ public class PlacesListActivity extends ListActivity {
 
 			Context context = PlacesListActivity.this.getApplicationContext();
 
+			// Transform location to address using reverse geocoding
 			Geocoder geocoder = new Geocoder(context, Locale.getDefault());
 			List<Address> adresses = Collections.emptyList();
 			try {
@@ -183,7 +191,7 @@ public class PlacesListActivity extends ListActivity {
 			Log.d(TAG, "<< LocationTask: mFuelChoice " + m_fuelChoice
 					+ " m_postalCode " + m_postalCode + ">>");
 
-			//TODO: Use String resources for text
+			// TODO: Use String resources for text
 			m_headerView.setText("Locatie gevonden, postcode: " + m_postalCode);
 			new DownloadTask().execute(m_fuelChoice, m_postalCode);
 		}
