@@ -1,11 +1,19 @@
 package com.nagazuka.mobile.android.goedkooptanken;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -38,13 +46,15 @@ public class PlacesListActivity extends ListActivity {
 	private static final int DIALOG_PROGRESS = 1;
 	private static final int MAX_PROGRESS = 100;
 	private static final String[] GAS_STATIONS = new String[] {
-			"Shell Binckhorst", "BP", "Firezone", "Total", "Elf", "Fina",
-			"Texaco" };
+			"Tango Den Haag", "ANWB Tankstation", "Argos Rijswijk",
+			"Shell Express Delftselaan", "BP Express Voorburg",
+			"Shell Express 's Gravenhage", "Berkman Voorburg" };
 	private static final String[] ADDRESSES = new String[] {
-			"Caan van Necklaan 118, Rijswijk ZH",
-			"Vsn Campenvaart 49, Den Haag", "Laakweg 214, Den Haag",
-			"Wolmaransstraat 331, Den Haag", "Beechavenue 1, Rozenburg",
-			"Stadhuisplein 1, Rotterdam", "Coolsingel 10, Rotterdam" };
+			"Waldorpstraat 51, Den Haag",
+			"Laan van Nieuw Oost Einde 293, Voorburg",
+			"Jan Thijssenweg 14, Den Haag", "Delftselaan 126, Den Haag",
+			"Prins Bernhardlaan 516, Voorburg", "Else Mauhslaan 2, Den Haag",
+			"Oosteinde 214, Voorburg" };
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
@@ -201,6 +211,27 @@ public class PlacesListActivity extends ListActivity {
 
 		@Override
 		protected List<Place> doInBackground(String... params) {
+			String result = "";
+			
+			HttpClient httpClient = new DefaultHttpClient();
+			String URL = "http://zukaservice.appspot.com/goedkooptanken/1.0/";
+			String combinedParams = "?brandstof=" + URLEncoder.encode(params[0]) + "&postcode=" + params[1];			
+			HttpGet request = new HttpGet(URL + combinedParams);
+			
+			Log.i(TAG, request.toString());
+			
+			ResponseHandler<String> handler = new BasicResponseHandler();
+			try {
+				result = httpClient.execute(request, handler);
+			} catch (ClientProtocolException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			httpClient.getConnectionManager().shutdown();
+			Log.i(TAG, result);
+
 			List<Place> results = getDummyPlaces();
 			return results;
 		}
