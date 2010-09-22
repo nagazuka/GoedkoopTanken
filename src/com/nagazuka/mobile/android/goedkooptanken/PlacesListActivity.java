@@ -14,6 +14,8 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -45,16 +47,6 @@ public class PlacesListActivity extends ListActivity {
 
 	private static final int DIALOG_PROGRESS = 1;
 	private static final int MAX_PROGRESS = 100;
-	private static final String[] GAS_STATIONS = new String[] {
-			"Tango Den Haag", "ANWB Tankstation", "Argos Rijswijk",
-			"Shell Express Delftselaan", "BP Express Voorburg",
-			"Shell Express 's Gravenhage", "Berkman Voorburg" };
-	private static final String[] ADDRESSES = new String[] {
-			"Waldorpstraat 51, Den Haag",
-			"Laan van Nieuw Oost Einde 293, Voorburg",
-			"Jan Thijssenweg 14, Den Haag", "Delftselaan 126, Den Haag",
-			"Prins Bernhardlaan 516, Voorburg", "Else Mauhslaan 2, Den Haag",
-			"Oosteinde 214, Voorburg" };
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
@@ -102,17 +94,6 @@ public class PlacesListActivity extends ListActivity {
 		setListAdapter(m_adapter);
 
 		new LocationTask().execute();
-	}
-
-	private static List<Place> getDummyPlaces() {
-		ArrayList<Place> res = new ArrayList<Place>();
-		Random generator = new Random();
-		for (int i = 0; i < GAS_STATIONS.length; i++) {
-			double price = 1.40 + 0.5 * generator.nextDouble();
-			res.add(new Place(GAS_STATIONS[i], ADDRESSES[i], price));
-		}
-		Collections.sort(res);
-		return res;
 	}
 
 	private class LocationTask extends AsyncTask<Void, Integer, String> {
@@ -211,18 +192,21 @@ public class PlacesListActivity extends ListActivity {
 
 		@Override
 		protected List<Place> doInBackground(String... params) {
-			String result = "";
-			
+			List<Place> results = new ArrayList<Place>();
+
 			HttpClient httpClient = new DefaultHttpClient();
+			// TODO: config properties file
 			String URL = "http://zukaservice.appspot.com/goedkooptanken/1.0/";
-			String combinedParams = "?brandstof=" + URLEncoder.encode(params[0]) + "&postcode=" + params[1];			
+			String combinedParams = "?brandstof="
+					+ URLEncoder.encode(params[0]) + "&postcode=" + params[1];
 			HttpGet request = new HttpGet(URL + combinedParams);
-			
+
 			Log.i(TAG, request.toString());
-			
+
+			String response = "";
 			ResponseHandler<String> handler = new BasicResponseHandler();
 			try {
-				result = httpClient.execute(request, handler);
+				response = httpClient.execute(request, handler);
 			} catch (ClientProtocolException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -230,9 +214,23 @@ public class PlacesListActivity extends ListActivity {
 			}
 
 			httpClient.getConnectionManager().shutdown();
-			Log.i(TAG, result);
+			Log.i(TAG, response);
 
-			List<Place> results = getDummyPlaces();
+			try {
+				JSONObject jsonObject = new JSONObject(response);
+				JSONObject contextObject = jsonObject.getJSONObject("context");
+
+				if (contextObject.get("result").equals("Success")) {
+					results.addAll(PlacesConverter
+							.convertFromJSON(jsonObject));
+				} else {
+					// SHOW ERROR DIALOG or THROW EXCEPTION
+				}
+
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+
 			return results;
 		}
 
@@ -241,7 +239,6 @@ public class PlacesListActivity extends ListActivity {
 			Log
 					.d(TAG, "<< DownloadTask: result size = " + result.size()
 							+ ">>");
-
 			m_places.addAll(result);
 			m_adapter.notifyDataSetChanged();
 		}
