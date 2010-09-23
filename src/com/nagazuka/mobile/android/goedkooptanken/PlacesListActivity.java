@@ -113,7 +113,8 @@ public class PlacesListActivity extends ListActivity {
 			String provider = m_locationManager.getBestProvider(criteria, true);
 			Log.d(TAG, "<< bestProvider: " + provider + ">>");
 
-			// Could be that location services are not enabled or not available on device
+			// Could be that location services are not enabled or not available
+			// on device
 			if (provider == null) {
 				return "";
 			}
@@ -127,7 +128,7 @@ public class PlacesListActivity extends ListActivity {
 
 			Log.d(TAG, "<< Latitude: " + latitude + " Longitude: " + longitude
 					+ ">>");
-			mProgress = MAX_PROGRESS / 2;
+			mProgress = (int) (MAX_PROGRESS * 0.25);
 			publishProgress(mProgress);
 
 			Context context = PlacesListActivity.this.getApplicationContext();
@@ -151,7 +152,7 @@ public class PlacesListActivity extends ListActivity {
 								+ ">>");
 			}
 
-			mProgress = MAX_PROGRESS / 6 * 4;
+			mProgress = (int) (MAX_PROGRESS * 0.33);
 			publishProgress(mProgress);
 
 			for (int i = mProgress; i <= MAX_PROGRESS / 2; i++) {
@@ -169,7 +170,7 @@ public class PlacesListActivity extends ListActivity {
 
 		@Override
 		protected void onPostExecute(String result) {
-			mProgress = MAX_PROGRESS / 2;
+			mProgress = (int) (MAX_PROGRESS * 0.5);
 			m_progressDialog.setProgress(mProgress);
 			m_postalCode = result;
 
@@ -183,21 +184,33 @@ public class PlacesListActivity extends ListActivity {
 	}
 
 	private class DownloadTask extends AsyncTask<String, Integer, List<Place>> {
-		private int mProgress = MAX_PROGRESS / 2;
+		private int mProgress = (int) (MAX_PROGRESS * 0.5);
 
 		@Override
 		protected void onPreExecute() {
 			m_progressDialog.setTitle(R.string.progressdialog_title_download);
 		}
-		
+
 		@Override
 		protected List<Place> doInBackground(String... params) {
 			PlacesParams placesParams = new PlacesParams(params[0], params[1]);
-			
-			PlacesDownloader downloader = new ZukaServiceDownloader(); 
+
+			mProgress = (int) (MAX_PROGRESS * 0.75);
+			publishProgress(mProgress);
+
+			PlacesDownloader downloader = new ZukaServiceDownloader();
 			List<Place> results = downloader.fetchPlaces(placesParams);
 
+			mProgress = (int) (MAX_PROGRESS * 0.90);
+
+			publishProgress(mProgress);
+
 			return results;
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... progress) {
+			m_progressDialog.setProgress(progress[0]);
 		}
 
 		@Override
@@ -206,8 +219,10 @@ public class PlacesListActivity extends ListActivity {
 			m_progressDialog.setProgress(mProgress);
 			m_progressDialog.dismiss();
 
-			Log.d(TAG, "<< DownloadTask: result size = " + result.size() + ">>");
-			
+			Log
+					.d(TAG, "<< DownloadTask: result size = " + result.size()
+							+ ">>");
+
 			m_places.addAll(result);
 			m_adapter.notifyDataSetChanged();
 		}
