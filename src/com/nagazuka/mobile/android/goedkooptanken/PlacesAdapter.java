@@ -39,17 +39,17 @@ public class PlacesAdapter extends ArrayAdapter<Place> {
             }
             Place p = items.get(position);
             if (p != null) {
-                    TextView tt = (TextView) v.findViewById(R.id.nametext);
-                    TextView bt = (TextView) v.findViewById(R.id.addresstext);
-                    TextView pt = (TextView) v.findViewById(R.id.pricetext);
-                    if (tt != null) {
-                          tt.setText(p.getName());                            }
-                    if(bt != null){
-                          bt.setText(p.getAddress());
+                    TextView nameTextView = (TextView) v.findViewById(R.id.nametext);
+                    TextView addressTextView = (TextView) v.findViewById(R.id.addresstext);
+                    TextView priceTextView = (TextView) v.findViewById(R.id.pricetext);
+                    if (nameTextView != null) {
+                          nameTextView.setText(p.getName());                            }
+                    if(addressTextView != null){
+                    	addressTextView.setText(p.getAddress());
                     }
-                    if(pt != null){
+                    if(priceTextView != null){
                     	String priceStr = String.format("%.2f", p.getPrice());
-                        pt.setText(priceStr);
+                    	priceTextView.setText(priceStr);
                   }                    
             }
             
