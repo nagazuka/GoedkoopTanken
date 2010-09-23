@@ -17,6 +17,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.nagazuka.mobile.android.goedkooptanken.model.Place;
+import com.nagazuka.mobile.android.goedkooptanken.model.PlacesConstants;
+import com.nagazuka.mobile.android.goedkooptanken.model.PlacesParams;
+import com.nagazuka.mobile.android.goedkooptanken.web.PlacesDownloader;
+
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;

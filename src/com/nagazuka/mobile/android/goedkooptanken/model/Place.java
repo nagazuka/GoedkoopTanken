@@ -1,4 +1,4 @@
-package com.nagazuka.mobile.android.goedkooptanken;
+package com.nagazuka.mobile.android.goedkooptanken.model;
 
 public class Place implements Comparable<Place> {
 	private double price = 0.0;

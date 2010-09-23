@@ -1,4 +1,4 @@
-package com.nagazuka.mobile.android.goedkooptanken;
+package com.nagazuka.mobile.android.goedkooptanken.web;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -15,6 +15,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.nagazuka.mobile.android.goedkooptanken.model.Place;
+import com.nagazuka.mobile.android.goedkooptanken.model.PlacesParams;
 
 import android.util.Log;
 

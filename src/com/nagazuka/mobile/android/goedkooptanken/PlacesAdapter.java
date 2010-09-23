@@ -3,6 +3,8 @@ package com.nagazuka.mobile.android.goedkooptanken;
 import java.util.Collections;
 import java.util.List;
 
+import com.nagazuka.mobile.android.goedkooptanken.model.Place;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;

@@ -1,5 +1,7 @@
 package com.nagazuka.mobile.android.goedkooptanken;
 
+import com.nagazuka.mobile.android.goedkooptanken.model.PlacesConstants;
+
 import android.app.TabActivity;
 import android.content.Intent;
 import android.content.res.Resources;
