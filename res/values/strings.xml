@@ -5,7 +5,8 @@
 	<string name="postcodeButton_text">Zoeken op postcode</string>
 	<string name="results_label">Zoekresultaten</string>
 	<string name="map_label">Kaart</string>
-	<string name="progressdialog_title">Locatie bepalen</string>
+	<string name="progressdialog_title_location">Locatie bepalen</string>
+	<string name="progressdialog_title_download">Tankstations downloaden</string>
 	<string name="progressdialog_cancel">Annuleren</string>
 	<string name="gastype_prompt">Kies een brandstof</string>
 	<string name="no_results">Geen tankstations gevonden</string>

@@ -54,8 +54,7 @@ public class PlacesListActivity extends ListActivity {
 		switch (id) {
 		case DIALOG_PROGRESS:
 			m_progressDialog = new ProgressDialog(PlacesListActivity.this);
-			m_progressDialog.setIcon(R.drawable.ic_gps_satellite);
-			m_progressDialog.setTitle(R.string.progressdialog_title);
+			m_progressDialog.setIcon(R.drawable.ic_gps_satellite);			
 			m_progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 			m_progressDialog.setMax(MAX_PROGRESS);
 			m_progressDialog.setButton2(
@@ -105,6 +104,7 @@ public class PlacesListActivity extends ListActivity {
 			m_locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
 			showDialog(DIALOG_PROGRESS);
+			m_progressDialog.setTitle(R.string.progressdialog_title_location);
 			m_progressDialog.setProgress(mProgress);
 		}
 
@@ -117,7 +117,7 @@ public class PlacesListActivity extends ListActivity {
 			String provider = m_locationManager.getBestProvider(criteria, true);
 			Log.d(TAG, "<< bestProvider: " + provider + ">>");
 
-			// Could be that GPS is not enabled or not available on device
+			// Could be that location services are not enabled or not available on device
 			if (provider == null) {
 				return "";
 			}
@@ -155,10 +155,10 @@ public class PlacesListActivity extends ListActivity {
 								+ ">>");
 			}
 
-			mProgress = MAX_PROGRESS / 3 * 4;
+			mProgress = MAX_PROGRESS / 6 * 4;
 			publishProgress(mProgress);
 
-			for (int i = mProgress; i <= MAX_PROGRESS; i++) {
+			for (int i = mProgress; i <= MAX_PROGRESS / 2; i++) {
 				mProgress++;
 				publishProgress(mProgress);
 			}
@@ -173,10 +173,8 @@ public class PlacesListActivity extends ListActivity {
 
 		@Override
 		protected void onPostExecute(String result) {
-			mProgress = MAX_PROGRESS;
+			mProgress = MAX_PROGRESS / 2;
 			m_progressDialog.setProgress(mProgress);
-			m_progressDialog.dismiss();
-
 			m_postalCode = result;
 
 			Log.d(TAG, "<< LocationTask: mFuelChoice " + m_fuelChoice
@@ -189,59 +187,31 @@ public class PlacesListActivity extends ListActivity {
 	}
 
 	private class DownloadTask extends AsyncTask<String, Integer, List<Place>> {
+		private int mProgress = MAX_PROGRESS / 2;
 
 		@Override
+		protected void onPreExecute() {
+			m_progressDialog.setTitle(R.string.progressdialog_title_download);
+		}
+		
+		@Override
 		protected List<Place> doInBackground(String... params) {
-			List<Place> results = new ArrayList<Place>();
-
-			HttpClient httpClient = new DefaultHttpClient();
-			// TODO: config properties file
-			String URL = "http://zukaservice.appspot.com/goedkooptanken/1.0/";
-			String combinedParams = "?brandstof="
-					+ URLEncoder.encode(params[0]) + "&postcode=" + params[1];
-			HttpGet request = new HttpGet(URL + combinedParams);
-
-			Log.i(TAG, request.toString());
-
-			String response = "";
-			ResponseHandler<String> handler = new BasicResponseHandler();
-			try {
-				response = httpClient.execute(request, handler);
-			} catch (ClientProtocolException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-			httpClient.getConnectionManager().shutdown();
-			Log.i(TAG, response);
-
-			try {
-				JSONObject jsonObject = new JSONObject(response);
-				JSONObject contextObject = jsonObject.getJSONObject("context");
-
-				if (contextObject.get("result").equals("Success")) {
-					results.addAll(PlacesConverter
-							.convertFromJSON(jsonObject));
-				} else {
-					// SHOW ERROR DIALOG or THROW EXCEPTION
-				}
-
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+			PlacesParams placesParams = new PlacesParams(params[0], params[1]);
+			List<Place> results = PlacesDownloader.fetchPlaces(placesParams);
 
 			return results;
 		}
 
 		@Override
 		protected void onPostExecute(List<Place> result) {
-			Log
-					.d(TAG, "<< DownloadTask: result size = " + result.size()
-							+ ">>");
+			mProgress = MAX_PROGRESS;
+			m_progressDialog.setProgress(mProgress);
+			m_progressDialog.dismiss();
+
+			Log.d(TAG, "<< DownloadTask: result size = " + result.size() + ">>");
+			
 			m_places.addAll(result);
 			m_adapter.notifyDataSetChanged();
 		}
 	}
-
 }
