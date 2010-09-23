@@ -48,10 +48,9 @@ public class PlacesAdapter extends ArrayAdapter<Place> {
                           bt.setText(p.getAddress());
                     }
                     if(pt != null){
-                    	String price = String.format("%.2f", p.getPrice());
-                        pt.setText(price);
-                  }
-                    
+                    	String priceStr = String.format("%.2f", p.getPrice());
+                        pt.setText(priceStr);
+                  }                    
             }
             
            

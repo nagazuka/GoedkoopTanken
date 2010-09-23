@@ -1,10 +1,13 @@
 package com.nagazuka.mobile.android.goedkooptanken.web;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -99,7 +102,7 @@ public class ZukaServiceDownloader implements PlacesDownloader {
 					String address = place.getString(JSON_ADDRESS);
 					String name = place.getString(JSON_NAME);
 					double price = parsePrice(place.getString(JSON_PRICE));
-
+					Log.d(TAG, "<< Parsed price: " + price);
 					result.add(new Place(address, name, price));
 				}
 			}
@@ -110,9 +113,21 @@ public class ZukaServiceDownloader implements PlacesDownloader {
 		return result;
 	}
 
-	private double parsePrice(String string) {
-		// TODO Auto-generated method stub
-		return 1.5;
-	}
+	private double parsePrice(String currencyStr) {
+		double result = 0.0;
+		if (currencyStr != null) {
+			String[] splitBySpace = currencyStr.split(" ");
 
+			if (splitBySpace.length == 2) {
+				String priceStr = splitBySpace[1];
+				try {
+					result = Double.parseDouble(priceStr);
+				} catch (NumberFormatException ex) {
+					Log.e(TAG, "<< Cannot parse price string: " + priceStr);
+				}
+			}
+		}
+
+		return result;
+	}
 }

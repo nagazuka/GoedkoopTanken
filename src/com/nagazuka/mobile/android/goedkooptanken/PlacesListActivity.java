@@ -49,7 +49,8 @@ public class PlacesListActivity extends ListActivity {
 		switch (id) {
 		case DIALOG_PROGRESS:
 			m_progressDialog = new ProgressDialog(PlacesListActivity.this);
-			m_progressDialog.setIcon(R.drawable.ic_gps_satellite);			
+			m_progressDialog.setIcon(R.drawable.ic_gps_satellite);
+			m_progressDialog.setTitle(R.string.progressdialog_title_location);
 			m_progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 			m_progressDialog.setMax(MAX_PROGRESS);
 			m_progressDialog.setButton2(
