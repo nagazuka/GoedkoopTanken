@@ -1,26 +1,10 @@
 package com.nagazuka.mobile.android.goedkooptanken;
 
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
-
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.nagazuka.mobile.android.goedkooptanken.model.Place;
-import com.nagazuka.mobile.android.goedkooptanken.model.PlacesConstants;
-import com.nagazuka.mobile.android.goedkooptanken.model.PlacesParams;
-import com.nagazuka.mobile.android.goedkooptanken.web.PlacesDownloader;
 
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -37,6 +21,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.nagazuka.mobile.android.goedkooptanken.model.Place;
+import com.nagazuka.mobile.android.goedkooptanken.model.PlacesConstants;
+import com.nagazuka.mobile.android.goedkooptanken.model.PlacesParams;
+import com.nagazuka.mobile.android.goedkooptanken.web.PlacesDownloader;
+import com.nagazuka.mobile.android.goedkooptanken.web.ZukaServiceDownloader;
 
 public class PlacesListActivity extends ListActivity {
 
@@ -202,7 +192,9 @@ public class PlacesListActivity extends ListActivity {
 		@Override
 		protected List<Place> doInBackground(String... params) {
 			PlacesParams placesParams = new PlacesParams(params[0], params[1]);
-			List<Place> results = PlacesDownloader.fetchPlaces(placesParams);
+			
+			PlacesDownloader downloader = new ZukaServiceDownloader(); 
+			List<Place> results = downloader.fetchPlaces(placesParams);
 
 			return results;
 		}

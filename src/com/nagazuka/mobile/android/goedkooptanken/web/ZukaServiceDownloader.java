@@ -21,29 +21,36 @@ import com.nagazuka.mobile.android.goedkooptanken.model.PlacesParams;
 
 import android.util.Log;
 
-public class PlacesDownloader {
-	
+public class ZukaServiceDownloader implements PlacesDownloader {
+
 	private static final String TAG = "PlacesDownloader";
 
 	private static final String URL_ZUKASERVICE = "http://zukaservice.appspot.com/goedkooptanken/1.0/";
-	
-	public static List<Place> fetchPlaces(PlacesParams params) {
+
+	private static final String JSON_RESULTS = "results";
+	private static final String JSON_ADDRESS = "address";
+	private static final String JSON_NAME = "name";
+	private static final String JSON_PRICE = "price";
+	private static final String JSON_CONTEXT = "context";
+	private static final String JSON_CONTEXT_RESULT = "result";
+
+	public List<Place> fetchPlaces(PlacesParams params) {
 		String response = download(params);
-		
+
 		List<Place> result = convertFromJSON(response);
 		return result;
 	}
 
-	public static String download(PlacesParams params) {
-		HttpClient httpClient = new DefaultHttpClient();		
-		
+	public String download(PlacesParams params) {
+		HttpClient httpClient = new DefaultHttpClient();
+
 		HttpGet request = new HttpGet(constructURL(params));
 
 		Log.i(TAG, "<< HTTP Request: " + request.toString());
 
 		String response = "";
 		ResponseHandler<String> handler = new BasicResponseHandler();
-		
+
 		try {
 			response = httpClient.execute(request, handler);
 		} catch (ClientProtocolException e) {
@@ -53,37 +60,32 @@ public class PlacesDownloader {
 		}
 
 		httpClient.getConnectionManager().shutdown();
-		
+
 		Log.i(TAG, "<< HTTP Response: " + response);
-		
-		return response;		
+
+		return response;
 	}
-	
+
 	private static String constructURL(PlacesParams params) {
-		String URL = URL_ZUKASERVICE; 
+		String URL = URL_ZUKASERVICE;
 		String combinedParams = "?brandstof="
-				+ URLEncoder.encode(params.getBrandstof()) + "&postcode=" + params.getPostcode();
+				+ URLEncoder.encode(params.getBrandstof()) + "&postcode="
+				+ params.getPostcode();
 		return URL + combinedParams;
 	}
-	
-	private static final String JSON_RESULTS = "results";
-	private static final String JSON_ADDRESS = "address";
-	private static final String JSON_NAME = "name";
-	private static final String JSON_PRICE = "price";
 
-	private static final String JSON_CONTEXT = "context";
-	private static final String JSON_CONTEXT_RESULT = "result";
-
-	public static List<Place> convertFromJSON(String response) {
+	public List<Place> convertFromJSON(String response) {
 		List<Place> result = Collections.emptyList();
-		
+
 		try {
 			JSONObject jsonResponse = new JSONObject(response);
-						
+
 			if (jsonResponse.has(JSON_CONTEXT)) {
 				JSONObject context = jsonResponse.getJSONObject(JSON_CONTEXT);
-				if (!context.has(JSON_CONTEXT_RESULT) || !context.getString(JSON_CONTEXT_RESULT).equals("Success")) {
-					//THROW EXCEPTION
+				if (!context.has(JSON_CONTEXT_RESULT)
+						|| !context.getString(JSON_CONTEXT_RESULT).equals(
+								"Success")) {
+					// THROW EXCEPTION
 				}
 			}
 
@@ -108,9 +110,9 @@ public class PlacesDownloader {
 		return result;
 	}
 
-	private static double parsePrice(String string) {
+	private double parsePrice(String string) {
 		// TODO Auto-generated method stub
 		return 1.5;
 	}
-	
+
 }
