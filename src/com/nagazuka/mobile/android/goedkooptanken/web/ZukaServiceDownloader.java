@@ -100,10 +100,10 @@ public class ZukaServiceDownloader implements PlacesDownloader {
 					JSONObject place = jsonPlaces.getJSONObject(i);
 
 					String address = place.getString(JSON_ADDRESS);
-					String name = place.getString(JSON_NAME);
+					String name = place.getString(JSON_NAME);					
 					double price = parsePrice(place.getString(JSON_PRICE));
 					Log.d(TAG, "<< Parsed price: " + price);
-					result.add(new Place(address, name, price));
+					result.add(new Place(name, address, price));
 				}
 			}
 		} catch (JSONException e) {
