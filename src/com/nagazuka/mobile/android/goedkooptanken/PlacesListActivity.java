@@ -25,8 +25,8 @@ import android.widget.TextView;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesConstants;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesParams;
-import com.nagazuka.mobile.android.goedkooptanken.web.PlacesDownloader;
-import com.nagazuka.mobile.android.goedkooptanken.web.ZukaServiceDownloader;
+import com.nagazuka.mobile.android.goedkooptanken.service.DownloadService;
+import com.nagazuka.mobile.android.goedkooptanken.service.impl.ZukaService;
 
 public class PlacesListActivity extends ListActivity {
 
@@ -198,7 +198,7 @@ public class PlacesListActivity extends ListActivity {
 			mProgress = (int) (MAX_PROGRESS * 0.75);
 			publishProgress(mProgress);
 
-			PlacesDownloader downloader = new ZukaServiceDownloader();
+			DownloadService downloader = new ZukaService();
 			List<Place> results = downloader.fetchPlaces(placesParams);
 
 			mProgress = (int) (MAX_PROGRESS * 0.90);

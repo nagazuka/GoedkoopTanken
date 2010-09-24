@@ -1,0 +1,49 @@
+package com.nagazuka.mobile.android.goedkooptanken.service.impl;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+
+import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
+import android.util.Log;
+
+import com.nagazuka.mobile.android.goedkooptanken.GoedkoopTankenApp;
+import com.nagazuka.mobile.android.goedkooptanken.PlacesListActivity;
+import com.nagazuka.mobile.android.goedkooptanken.model.Place;
+import com.nagazuka.mobile.android.goedkooptanken.model.PlacesParams;
+import com.nagazuka.mobile.android.goedkooptanken.service.DownloadService;
+import com.nagazuka.mobile.android.goedkooptanken.service.GeoCodingService;
+
+public class GoogleGeocoder implements GeoCodingService {
+	private static final String TAG = "GoogleGeocoder";
+
+	@Override
+	public String getPostalCode(double latitude, double longitude) {
+		String postalCode = "";
+		Context context = GoedkoopTankenApp.getContext();
+
+		int maxResults = 1;
+		// Transform location to address using reverse geocoding
+		Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+		List<Address> adresses = Collections.emptyList();
+		try {
+			adresses = geocoder
+					.getFromLocation(latitude, longitude, maxResults);
+		} catch (IOException e) {
+			Log.e(TAG, "<< Error looking up address with Geocoder >>");
+			e.printStackTrace();
+		}
+
+		if (!adresses.isEmpty()) {
+			Address address = adresses.get(0);
+			postalCode = address.getPostalCode();
+			Log.d(TAG, "<< Geocoder found postalCode: " + postalCode + ">>");
+		}
+
+		return postalCode;
+	}
+
+}

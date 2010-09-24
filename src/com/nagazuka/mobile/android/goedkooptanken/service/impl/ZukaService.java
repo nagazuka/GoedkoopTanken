@@ -1,4 +1,4 @@
-package com.nagazuka.mobile.android.goedkooptanken.web;
+package com.nagazuka.mobile.android.goedkooptanken.service.impl;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -21,10 +21,11 @@ import org.json.JSONObject;
 
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesParams;
+import com.nagazuka.mobile.android.goedkooptanken.service.DownloadService;
 
 import android.util.Log;
 
-public class ZukaServiceDownloader implements PlacesDownloader {
+public class ZukaService implements DownloadService {
 
 	private static final String TAG = "PlacesDownloader";
 
