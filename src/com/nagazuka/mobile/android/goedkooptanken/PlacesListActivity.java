@@ -155,10 +155,17 @@ public class PlacesListActivity extends ListActivity {
 
 			Log.d(TAG, "<< LocationTask: mFuelChoice " + m_fuelChoice
 					+ " m_postalCode " + m_postalCode + ">>");
-
-			// TODO: Use String resources for text
-			m_headerView.setText("Locatie gevonden, postcode: " + m_postalCode);
-			new DownloadTask().execute(m_fuelChoice, m_postalCode);
+			
+			if (m_postalCode != null && m_postalCode.length() > 0) {
+				// TODO: Use String resources for text
+				m_headerView.setText("Locatie gevonden, postcode: " + m_postalCode);
+				new DownloadTask().execute(m_fuelChoice, m_postalCode);
+			}
+			else {
+				m_progressDialog.setProgress(MAX_PROGRESS);
+				m_progressDialog.dismiss();
+				//TODO: Show error dialog, ask for postal code
+			}
 		}
 	}
 
