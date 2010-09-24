@@ -48,7 +48,7 @@ public class PlacesAdapter extends ArrayAdapter<Place> {
                     	addressTextView.setText(p.getAddress());
                     }
                     if(priceTextView != null){
-                    	String priceStr = String.format("%.2f", p.getPrice());
+                    	String priceStr = String.format("\u20AC %.2f", p.getPrice());
                     	priceTextView.setText(priceStr);
                   }                    
             }
