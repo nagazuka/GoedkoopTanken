@@ -11,10 +11,6 @@ import android.location.Geocoder;
 import android.util.Log;
 
 import com.nagazuka.mobile.android.goedkooptanken.GoedkoopTankenApp;
-import com.nagazuka.mobile.android.goedkooptanken.PlacesListActivity;
-import com.nagazuka.mobile.android.goedkooptanken.model.Place;
-import com.nagazuka.mobile.android.goedkooptanken.model.PlacesParams;
-import com.nagazuka.mobile.android.goedkooptanken.service.DownloadService;
 import com.nagazuka.mobile.android.goedkooptanken.service.GeoCodingService;
 
 public class GoogleGeocoder implements GeoCodingService {

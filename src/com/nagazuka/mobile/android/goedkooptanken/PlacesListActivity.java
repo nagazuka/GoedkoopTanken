@@ -1,19 +1,15 @@
 package com.nagazuka.mobile.android.goedkooptanken;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.location.Address;
 import android.location.Criteria;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -128,7 +124,6 @@ public class PlacesListActivity extends ListActivity {
 
 			double latitude = location.getLatitude();
 			double longitude = location.getLongitude();
-			int maxResults = 1;
 
 			Log.d(TAG, "<< Latitude: " + latitude + " Longitude: " + longitude
 					+ ">>");

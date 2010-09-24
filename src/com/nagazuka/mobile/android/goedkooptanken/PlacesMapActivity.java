@@ -4,7 +4,6 @@ import java.util.List;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.widget.LinearLayout;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -14,7 +13,6 @@ import com.google.android.maps.OverlayItem;
 
 public class PlacesMapActivity extends MapActivity {
 
-	private LinearLayout linearLayout;
 	private MapView mapView;
 
 	/** Called when the activity is first created. */
