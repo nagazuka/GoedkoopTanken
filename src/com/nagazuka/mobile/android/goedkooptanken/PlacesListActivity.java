@@ -26,6 +26,8 @@ import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesConstants;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesParams;
 import com.nagazuka.mobile.android.goedkooptanken.service.DownloadService;
+import com.nagazuka.mobile.android.goedkooptanken.service.GeoCodingService;
+import com.nagazuka.mobile.android.goedkooptanken.service.impl.GoogleGeocoder;
 import com.nagazuka.mobile.android.goedkooptanken.service.impl.ZukaService;
 
 public class PlacesListActivity extends ListActivity {
@@ -93,12 +95,14 @@ public class PlacesListActivity extends ListActivity {
 
 	private class LocationTask extends AsyncTask<Void, Integer, String> {
 		private int mProgress = 0;
-		private LocationManager m_locationManager;
-
+		private LocationManager m_locationManager = null;
+		private GeoCodingService m_geocodingService = null;
+		
 		@Override
 		public void onPreExecute() {
 			m_locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
+			m_geocodingService = new GoogleGeocoder();
+			
 			showDialog(DIALOG_PROGRESS);
 			m_progressDialog.setTitle(R.string.progressdialog_title_location);
 			m_progressDialog.setProgress(mProgress);
@@ -131,26 +135,8 @@ public class PlacesListActivity extends ListActivity {
 			mProgress = (int) (MAX_PROGRESS * 0.25);
 			publishProgress(mProgress);
 
-			Context context = PlacesListActivity.this.getApplicationContext();
-
 			// Transform location to address using reverse geocoding
-			Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-			List<Address> adresses = Collections.emptyList();
-			try {
-				adresses = geocoder.getFromLocation(latitude, longitude,
-						maxResults);
-			} catch (IOException e) {
-				Log.e(TAG, "<< Error looking up address with Geocoder >>");
-				e.printStackTrace();
-			}
-
-			if (!adresses.isEmpty()) {
-				Address address = adresses.get(0);
-				postalCode = address.getPostalCode();
-				Log
-						.d(TAG, "<< Geocoder found postalCode: " + postalCode
-								+ ">>");
-			}
+			postalCode = m_geocodingService.getPostalCode(latitude, longitude);
 
 			mProgress = (int) (MAX_PROGRESS * 0.33);
 			publishProgress(mProgress);
