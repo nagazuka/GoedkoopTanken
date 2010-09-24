@@ -94,7 +94,7 @@ public class PlacesListActivity extends ListActivity {
 	}
 
 	private class LocationTask extends AsyncTask<Void, Integer, String> {
-		private int mProgress = 0;
+		
 		private LocationManager m_locationManager = null;
 		private GeoCodingService m_geocodingService = null;
 		
@@ -105,7 +105,7 @@ public class PlacesListActivity extends ListActivity {
 			
 			showDialog(DIALOG_PROGRESS);
 			m_progressDialog.setTitle(R.string.progressdialog_title_location);
-			m_progressDialog.setProgress(mProgress);
+			m_progressDialog.setProgress(0);
 		}
 
 		@Override
@@ -132,19 +132,13 @@ public class PlacesListActivity extends ListActivity {
 
 			Log.d(TAG, "<< Latitude: " + latitude + " Longitude: " + longitude
 					+ ">>");
-			mProgress = (int) (MAX_PROGRESS * 0.25);
-			publishProgress(mProgress);
+			
+			publishProgress((int) (MAX_PROGRESS * 0.25));
 
 			// Transform location to address using reverse geocoding
 			postalCode = m_geocodingService.getPostalCode(latitude, longitude);
 
-			mProgress = (int) (MAX_PROGRESS * 0.33);
-			publishProgress(mProgress);
-
-			for (int i = mProgress; i <= MAX_PROGRESS / 2; i++) {
-				mProgress++;
-				publishProgress(mProgress);
-			}
+			publishProgress((int) (MAX_PROGRESS * 0.33));
 
 			return postalCode;
 		}
@@ -155,9 +149,8 @@ public class PlacesListActivity extends ListActivity {
 		}
 
 		@Override
-		protected void onPostExecute(String result) {
-			mProgress = (int) (MAX_PROGRESS * 0.5);
-			m_progressDialog.setProgress(mProgress);
+		protected void onPostExecute(String result) {			
+			m_progressDialog.setProgress((int) (MAX_PROGRESS * 0.5));
 			m_postalCode = result;
 
 			Log.d(TAG, "<< LocationTask: mFuelChoice " + m_fuelChoice
@@ -170,8 +163,7 @@ public class PlacesListActivity extends ListActivity {
 	}
 
 	private class DownloadTask extends AsyncTask<String, Integer, List<Place>> {
-		private int mProgress = (int) (MAX_PROGRESS * 0.5);
-
+		
 		@Override
 		protected void onPreExecute() {
 			m_progressDialog.setTitle(R.string.progressdialog_title_download);
@@ -181,15 +173,12 @@ public class PlacesListActivity extends ListActivity {
 		protected List<Place> doInBackground(String... params) {
 			PlacesParams placesParams = new PlacesParams(params[0], params[1]);
 
-			mProgress = (int) (MAX_PROGRESS * 0.75);
-			publishProgress(mProgress);
+			publishProgress((int) (MAX_PROGRESS * 0.75));
 
 			DownloadService downloader = new ZukaService();
 			List<Place> results = downloader.fetchPlaces(placesParams);
 
-			mProgress = (int) (MAX_PROGRESS * 0.90);
-
-			publishProgress(mProgress);
+			publishProgress((int) (MAX_PROGRESS * 0.90));
 
 			return results;
 		}
@@ -200,14 +189,11 @@ public class PlacesListActivity extends ListActivity {
 		}
 
 		@Override
-		protected void onPostExecute(List<Place> result) {
-			mProgress = MAX_PROGRESS;
-			m_progressDialog.setProgress(mProgress);
+		protected void onPostExecute(List<Place> result) {			
+			m_progressDialog.setProgress(MAX_PROGRESS);
 			m_progressDialog.dismiss();
 
-			Log
-					.d(TAG, "<< DownloadTask: result size = " + result.size()
-							+ ">>");
+			Log.d(TAG, "<< DownloadTask: result size = " + result.size()+ ">>");
 
 			m_places.addAll(result);
 			m_adapter.notifyDataSetChanged();
