@@ -68,25 +68,44 @@ public class PlacesListActivity extends ListActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		m_fuelChoice = getIntent().getStringExtra(
-				PlacesConstants.INTENT_EXTRA_FUEL_CHOICE);
 		
-		ListView listView = getListView();
-		listView.setTextFilterEnabled(true);
+	    final Object data = getLastNonConfigurationInstance();
+	    final List<Place> downloadedPlaces = (List<Place>) data;
+	    if (downloadedPlaces != null && downloadedPlaces.size() > 0) {
+	    	m_places = downloadedPlaces;
+			m_adapter = new PlacesAdapter(this, R.layout.row, m_places);
+			setListAdapter(m_adapter);
+	    }
+	    else {
+			m_fuelChoice = getIntent().getStringExtra(
+					PlacesConstants.INTENT_EXTRA_FUEL_CHOICE);
+			
+			ListView listView = getListView();
+			listView.setTextFilterEnabled(true);
 
-		m_headerView = new TextView(getApplicationContext());
-		m_headerView.setText("Zoeken naar tankstations voor brandstof "
-				+ m_fuelChoice + "...");
+			m_headerView = new TextView(getApplicationContext());
+			m_headerView.setText("Zoeken naar tankstations voor brandstof "
+					+ m_fuelChoice + "...");
 
-		listView.addHeaderView(m_headerView, null, false);
+			listView.addHeaderView(m_headerView, null, false);
 
-		m_places = new ArrayList<Place>();
-		m_adapter = new PlacesAdapter(this, R.layout.row, m_places);
+			m_places = new ArrayList<Place>();
+			m_adapter = new PlacesAdapter(this, R.layout.row, m_places);
+			setListAdapter(m_adapter);
 
-		setListAdapter(m_adapter);
-
-		new LocationTask().execute();
+			new LocationTask().execute();
+	    }
+	}
+	
+	@Override
+	public Object onRetainNonConfigurationInstance() {	    
+		List<Place> places = null;
+	    if (m_places != null && m_places.size() > 0) {
+	    	places = m_places;
+	    } else {
+	    	places = Collections.emptyList();
+	    }	    	
+	    return places;
 	}
 
 	private class LocationTask extends AsyncTask<Void, Integer, String> {
