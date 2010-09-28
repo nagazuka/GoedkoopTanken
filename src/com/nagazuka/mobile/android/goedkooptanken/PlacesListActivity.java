@@ -71,7 +71,7 @@ public class PlacesListActivity extends ListActivity {
 
 		m_fuelChoice = getIntent().getStringExtra(
 				PlacesConstants.INTENT_EXTRA_FUEL_CHOICE);
-
+		
 		ListView listView = getListView();
 		listView.setTextFilterEnabled(true);
 
@@ -121,6 +121,8 @@ public class PlacesListActivity extends ListActivity {
 
 			Location location = m_locationManager
 					.getLastKnownLocation(provider);
+			
+			((GoedkoopTankenApp)getApplication()).setLocation(location);
 
 			double latitude = location.getLatitude();
 			double longitude = location.getLongitude();

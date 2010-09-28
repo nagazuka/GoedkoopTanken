@@ -4,15 +4,19 @@
 	android:padding="6dip" android:orientation="horizontal">
 	<TextView android:id="@+id/pricetext" android:layout_width="0dip"
 		android:layout_height="fill_parent" android:layout_weight="1"
-		android:gravity="left" android:textSize="12pt" />
+		android:gravity="left" android:textSize="25sp" />
 	<LinearLayout android:orientation="vertical"
 		android:layout_width="0dip" android:layout_weight="2"
 		android:layout_height="fill_parent">
 		<TextView android:id="@+id/nametext" android:layout_width="fill_parent"
 			android:layout_height="0dip" android:layout_weight="1"
-			android:gravity="right" />
+			android:gravity="right" android:textSize="15sp" />
 		<TextView android:layout_width="fill_parent"
 			android:layout_height="0dip" android:layout_weight="1" android:id="@+id/addresstext"
-			android:gravity="right" android:singleLine="true" />
+			android:gravity="right" android:singleLine="true" android:textSize="12sp" />
+		<TextView android:layout_width="fill_parent"
+			android:layout_height="0dip" android:layout_weight="1" android:id="@+id/distancetext"
+			android:gravity="right" android:singleLine="true" android:textSize="12sp" />
+			
 	</LinearLayout>
 </LinearLayout>
