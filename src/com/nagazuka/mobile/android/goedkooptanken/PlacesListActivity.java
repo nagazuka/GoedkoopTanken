@@ -40,7 +40,6 @@ public class PlacesListActivity extends ListActivity {
 
 	private PlacesAdapter m_adapter;
 	private ProgressDialog m_progressDialog;
-	private TextView m_headerView;
 
 	private List<Place> m_places = Collections.emptyList();
 	private String m_postalCode = "";
@@ -95,12 +94,6 @@ public class PlacesListActivity extends ListActivity {
 			ListView listView = getListView();
 			listView.setTextFilterEnabled(true);
 
-			m_headerView = new TextView(getApplicationContext());
-			m_headerView.setText("Zoeken naar tankstations voor brandstof "
-					+ m_fuelChoice + "...");
-
-			listView.addHeaderView(m_headerView, null, false);
-
 			m_places = new ArrayList<Place>();
 			m_adapter = new PlacesAdapter(this, R.layout.row, m_places);
 			setListAdapter(m_adapter);
@@ -132,17 +125,20 @@ public class PlacesListActivity extends ListActivity {
 	}
 
 	private void openItemInGoogleMaps(int position) {
-		if (m_places != null && position >= 0 && position-1 < m_places.size()) {
-			Place selectedItem = m_places.get(position-1);
+		Log.d(TAG, "<< Position selected [" + position + "]");
+		if (m_places != null) {
+			Place selectedItem = m_places.get(position);
 			Uri geoUri = createGeoURI(selectedItem);
 			Intent mapCall = new Intent(Intent.ACTION_VIEW, geoUri);
 			startActivity(mapCall);
 		}
 	}
 
-	private Uri createGeoURI(Place selectedItem) {		
-		String geoUriString = "geo:0,0?q=Nederland,";
-		geoUriString += selectedItem.getAddress() + "," + selectedItem.getPostalCode();
+	private Uri createGeoURI(Place selectedItem) {
+		String geoUriString = "geo:0,0?q=Nederland, ";
+		geoUriString += selectedItem.getAddress() + ", "
+				+ selectedItem.getPostalCode();
+		Log.d(TAG, "<< Geo Uri String [" + geoUriString + "]");
 		Uri geoUri = Uri.parse(geoUriString);
 		return geoUri;
 	}
@@ -225,9 +221,6 @@ public class PlacesListActivity extends ListActivity {
 					+ " m_postalCode " + m_postalCode + ">>");
 
 			if (m_postalCode != null && m_postalCode.length() > 0) {
-				// TODO: Use String resources for text
-				m_headerView.setText("Locatie gevonden, postcode: "
-						+ m_postalCode);
 				new DownloadTask().execute(m_fuelChoice, m_postalCode);
 			} else {
 				m_progressDialog.setProgress(MAX_PROGRESS);
