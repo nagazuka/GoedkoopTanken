@@ -131,7 +131,7 @@ public class PlacesListActivity extends ListActivity {
 	}
 
 	private void openItemInGoogleMaps(int position) {
-		if (m_places != null) {
+		if (m_places != null && position >= 0 && position-1 < m_places.size()) {
 			Place selectedItem = m_places.get(position-1);
 			Uri geoUri = createGeoURI(selectedItem);
 			Intent mapCall = new Intent(Intent.ACTION_VIEW, geoUri);
