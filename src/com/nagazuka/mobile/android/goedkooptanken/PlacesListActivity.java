@@ -10,9 +10,11 @@ import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -131,13 +133,16 @@ public class PlacesListActivity extends ListActivity {
 	private void openItemInGoogleMaps(int position) {
 		if (m_places != null) {
 			Place selectedItem = m_places.get(position);
-			URI geoURI = createGeoURI(selectedItem);
-		}		
+			Uri geoUri = createGeoURI(selectedItem);
+			Intent mapCall = new Intent(Intent.ACTION_VIEW, geoUri);  
+			startActivity(mapCall);  
+	}		
 	}
 
-	private URI createGeoURI(Place selectedItem) {
-		// TODO Auto-generated method stub
-		return null;
+	private Uri createGeoURI(Place selectedItem) {
+		String geoUriString = "geo:0,0?q=Nederland";		  
+		Uri geoUri = Uri.parse(geoUriString);
+		return geoUri;
 	}
 
 	@Override
