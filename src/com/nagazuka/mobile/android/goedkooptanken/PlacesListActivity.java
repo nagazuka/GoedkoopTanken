@@ -1,5 +1,6 @@
 package com.nagazuka.mobile.android.goedkooptanken;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -15,8 +16,12 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesConstants;
@@ -40,6 +45,8 @@ public class PlacesListActivity extends ListActivity {
 
 	private static final int DIALOG_PROGRESS = 1;
 	private static final int MAX_PROGRESS = 100;
+
+	private static final int CONTEXT_MENU_MAPS_ID = 0;
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
@@ -68,18 +75,20 @@ public class PlacesListActivity extends ListActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-	    final Object data = getLastNonConfigurationInstance();
-	    final List<Place> downloadedPlaces = (List<Place>) data;
-	    if (downloadedPlaces != null && downloadedPlaces.size() > 0) {
-	    	m_places = downloadedPlaces;
+
+		// Check whether places have been downloaded before
+		// to avoid expensive loading on screen orientation change
+		final Object data = getLastNonConfigurationInstance();
+		final List<Place> downloadedPlaces = (List<Place>) data;
+
+		if (downloadedPlaces != null && downloadedPlaces.size() > 0) {
+			m_places = downloadedPlaces;
 			m_adapter = new PlacesAdapter(this, R.layout.row, m_places);
 			setListAdapter(m_adapter);
-	    }
-	    else {
+		} else {
 			m_fuelChoice = getIntent().getStringExtra(
 					PlacesConstants.INTENT_EXTRA_FUEL_CHOICE);
-			
+
 			ListView listView = getListView();
 			listView.setTextFilterEnabled(true);
 
@@ -94,30 +103,66 @@ public class PlacesListActivity extends ListActivity {
 			setListAdapter(m_adapter);
 
 			new LocationTask().execute();
-	    }
+		}
+		
+		registerForContextMenu(getListView());
 	}
-	
+
 	@Override
-	public Object onRetainNonConfigurationInstance() {	    
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenu.ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		menu.add(0, CONTEXT_MENU_MAPS_ID, 0, "Open in Google Maps");
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+				.getMenuInfo();
+		switch (item.getItemId()) {
+		case CONTEXT_MENU_MAPS_ID:
+			openItemInGoogleMaps(info.position);
+			return true;
+		default:
+			return super.onContextItemSelected(item);
+		}
+	}
+
+	private void openItemInGoogleMaps(int position) {
+		if (m_places != null) {
+			Place selectedItem = m_places.get(position);
+			URI geoURI = createGeoURI(selectedItem);
+		}		
+	}
+
+	private URI createGeoURI(Place selectedItem) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+		// Save downloaded places for future self
+		// (e.g. on screen orientation change)
 		List<Place> places = null;
-	    if (m_places != null && m_places.size() > 0) {
-	    	places = m_places;
-	    } else {
-	    	places = Collections.emptyList();
-	    }	    	
-	    return places;
+		if (m_places != null && m_places.size() > 0) {
+			places = m_places;
+		} else {
+			places = Collections.emptyList();
+		}
+		return places;
 	}
 
 	private class LocationTask extends AsyncTask<Void, Integer, String> {
-		
+
 		private LocationManager m_locationManager = null;
 		private GeoCodingService m_geocodingService = null;
-		
+
 		@Override
 		public void onPreExecute() {
 			m_locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 			m_geocodingService = new GoogleGeocoder();
-			
+
 			showDialog(DIALOG_PROGRESS);
 			m_progressDialog.setTitle(R.string.progressdialog_title_location);
 			m_progressDialog.setProgress(0);
@@ -140,15 +185,15 @@ public class PlacesListActivity extends ListActivity {
 
 			Location location = m_locationManager
 					.getLastKnownLocation(provider);
-			
-			((GoedkoopTankenApp)getApplication()).setLocation(location);
+
+			((GoedkoopTankenApp) getApplication()).setLocation(location);
 
 			double latitude = location.getLatitude();
 			double longitude = location.getLongitude();
 
 			Log.d(TAG, "<< Latitude: " + latitude + " Longitude: " + longitude
 					+ ">>");
-			
+
 			publishProgress((int) (MAX_PROGRESS * 0.25));
 
 			// Transform location to address using reverse geocoding
@@ -165,28 +210,28 @@ public class PlacesListActivity extends ListActivity {
 		}
 
 		@Override
-		protected void onPostExecute(String result) {			
+		protected void onPostExecute(String result) {
 			m_progressDialog.setProgress((int) (MAX_PROGRESS * 0.5));
 			m_postalCode = result;
 
 			Log.d(TAG, "<< LocationTask: mFuelChoice " + m_fuelChoice
 					+ " m_postalCode " + m_postalCode + ">>");
-			
+
 			if (m_postalCode != null && m_postalCode.length() > 0) {
 				// TODO: Use String resources for text
-				m_headerView.setText("Locatie gevonden, postcode: " + m_postalCode);
+				m_headerView.setText("Locatie gevonden, postcode: "
+						+ m_postalCode);
 				new DownloadTask().execute(m_fuelChoice, m_postalCode);
-			}
-			else {
+			} else {
 				m_progressDialog.setProgress(MAX_PROGRESS);
 				m_progressDialog.dismiss();
-				//TODO: Show error dialog, ask for postal code
+				// TODO: Show error dialog, ask for postal code
 			}
 		}
 	}
 
 	private class DownloadTask extends AsyncTask<String, Integer, List<Place>> {
-		
+
 		@Override
 		protected void onPreExecute() {
 			m_progressDialog.setTitle(R.string.progressdialog_title_download);
@@ -212,11 +257,13 @@ public class PlacesListActivity extends ListActivity {
 		}
 
 		@Override
-		protected void onPostExecute(List<Place> result) {			
+		protected void onPostExecute(List<Place> result) {
 			m_progressDialog.setProgress(MAX_PROGRESS);
 			m_progressDialog.dismiss();
 
-			Log.d(TAG, "<< DownloadTask: result size = " + result.size()+ ">>");
+			Log
+					.d(TAG, "<< DownloadTask: result size = " + result.size()
+							+ ">>");
 
 			m_places.addAll(result);
 			m_adapter.notifyDataSetChanged();
