@@ -11,9 +11,9 @@ import android.location.Geocoder;
 import android.util.Log;
 
 import com.nagazuka.mobile.android.goedkooptanken.GoedkoopTankenApp;
-import com.nagazuka.mobile.android.goedkooptanken.service.GeoCodingService;
+import com.nagazuka.mobile.android.goedkooptanken.service.GeocodingService;
 
-public class GoogleGeocoder implements GeoCodingService {
+public class GoogleGeocoder implements GeocodingService {
 	private static final String TAG = "GoogleGeocoder";
 
 	@Override
