@@ -1,16 +1,17 @@
 package com.nagazuka.mobile.android.goedkooptanken;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.DialogInterface.OnCancelListener;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -22,10 +23,8 @@ import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
-import com.nagazuka.mobile.android.goedkooptanken.R;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesConstants;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesParams;
@@ -156,13 +155,29 @@ public class PlacesListActivity extends ListActivity {
 		return places;
 	}
 
+	private void showExceptionAlert(Exception e) {
+		if (e != null) {
+			Log.e(TAG, "<< Exception occurred in LocationTask: "
+					+ e.getMessage());
+		}
+		new AlertDialog.Builder(PlacesListActivity.this).setMessage(
+				"Locatie kan niet automatisch worden bepaald")
+				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						PlacesListActivity.this.finish();
+					}
+				}).show();
+	}
+
 	private class LocationTask extends AsyncTask<Void, Integer, String> {
 
+		private Exception m_exception = null;
 		private LocationManager m_locationManager = null;
 		private GeocodingService m_geocodingService = null;
 
 		@Override
 		public void onPreExecute() {
+			m_exception = null;
 			m_locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 			m_geocodingService = new GoogleGeocodingService();
 
@@ -175,34 +190,42 @@ public class PlacesListActivity extends ListActivity {
 		protected String doInBackground(Void... params) {
 			String postalCode = "";
 
-			Criteria criteria = new Criteria();
-			criteria.setAccuracy(Criteria.ACCURACY_FINE);
-			String provider = m_locationManager.getBestProvider(criteria, true);
-			Log.d(TAG, "<< bestProvider: " + provider + ">>");
+			try {
+				Criteria criteria = new Criteria();
+				criteria.setAccuracy(Criteria.ACCURACY_FINE);
+				String provider = m_locationManager.getBestProvider(criteria,
+						true);
+				Log.d(TAG, "<< bestProvider: " + provider + ">>");
 
-			// Could be that location services are not enabled or not available
-			// on device
-			if (provider == null) {
-				return "";
+				// Could be that location services are not enabled or not
+				// available
+				// on device
+				if (provider == null) {
+					return "";
+				}
+
+				Location location = m_locationManager
+						.getLastKnownLocation(provider);
+
+				((GoedkoopTankenApp) getApplication()).setLocation(location);
+
+				double latitude = location.getLatitude();
+				double longitude = location.getLongitude();
+
+				Log.d(TAG, "<< Latitude: " + latitude + " Longitude: "
+						+ longitude + ">>");
+
+				publishProgress((int) (MAX_PROGRESS * 0.25));
+
+				// Transform location to address using reverse geocoding
+				postalCode = m_geocodingService.getPostalCode(latitude,
+						longitude);
+
+				publishProgress((int) (MAX_PROGRESS * 0.33));
+
+			} catch (Exception e) {
+				m_exception = e;
 			}
-
-			Location location = m_locationManager
-					.getLastKnownLocation(provider);
-
-			((GoedkoopTankenApp) getApplication()).setLocation(location);
-
-			double latitude = location.getLatitude();
-			double longitude = location.getLongitude();
-
-			Log.d(TAG, "<< Latitude: " + latitude + " Longitude: " + longitude
-					+ ">>");
-
-			publishProgress((int) (MAX_PROGRESS * 0.25));
-
-			// Transform location to address using reverse geocoding
-			postalCode = m_geocodingService.getPostalCode(latitude, longitude);
-
-			publishProgress((int) (MAX_PROGRESS * 0.33));
 
 			return postalCode;
 		}
@@ -220,33 +243,43 @@ public class PlacesListActivity extends ListActivity {
 			Log.d(TAG, "<< LocationTask: mFuelChoice " + m_fuelChoice
 					+ " m_postalCode " + m_postalCode + ">>");
 
-			if (m_postalCode != null && m_postalCode.length() > 0) {
-				new DownloadTask().execute(m_fuelChoice, m_postalCode);
-			} else {
+			if (m_exception != null || m_postalCode == null
+					|| m_postalCode.length() == 0) {
 				m_progressDialog.setProgress(MAX_PROGRESS);
 				m_progressDialog.dismiss();
-				// TODO: Show error dialog, ask for postal code
+				showExceptionAlert(m_exception);
+			} else {
+				new DownloadTask().execute(m_fuelChoice, m_postalCode);
 			}
 		}
 	}
 
 	private class DownloadTask extends AsyncTask<String, Integer, List<Place>> {
+		private Exception m_exception = null;
 
 		@Override
 		protected void onPreExecute() {
+			m_exception = null;
 			m_progressDialog.setTitle(R.string.progressdialog_title_download);
 		}
 
 		@Override
 		protected List<Place> doInBackground(String... params) {
-			PlacesParams placesParams = new PlacesParams(params[0], params[1]);
+			List<Place> results = Collections.emptyList();
 
-			publishProgress((int) (MAX_PROGRESS * 0.75));
+			try {
+				PlacesParams placesParams = new PlacesParams(params[0],
+						params[1]);
 
-			DownloadService downloader = new ZukaService();
-			List<Place> results = downloader.fetchPlaces(placesParams);
+				publishProgress((int) (MAX_PROGRESS * 0.75));
 
-			publishProgress((int) (MAX_PROGRESS * 0.90));
+				DownloadService downloader = new ZukaService();
+				results = downloader.fetchPlaces(placesParams);
+
+				publishProgress((int) (MAX_PROGRESS * 0.90));
+			} catch (Exception e) {
+				m_exception = e;
+			}
 
 			return results;
 		}
@@ -261,12 +294,16 @@ public class PlacesListActivity extends ListActivity {
 			m_progressDialog.setProgress(MAX_PROGRESS);
 			m_progressDialog.dismiss();
 
-			Log
-					.d(TAG, "<< DownloadTask: result size = " + result.size()
-							+ ">>");
+			if (m_exception != null) {
+				showExceptionAlert(m_exception);
+			} else {
+				Log.d(TAG, "<< DownloadTask: result size = " + result.size()
+						+ ">>");
 
-			m_places.addAll(result);
-			m_adapter.notifyDataSetChanged();
+				m_places.addAll(result);
+				m_adapter.notifyDataSetChanged();
+			}
+
 		}
 	}
 }
