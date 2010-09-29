@@ -51,18 +51,19 @@ public class Place implements Comparable<Place> {
 		return distance;
 	}
 
-	@Override
-	public int compareTo(Place another) {		
-		int diff = (int) (this.getPrice() * 100 - another.getPrice() * 100);
-		return diff;
-	}
-
 	public void setPostalCode(String postalCode) {
 		this.postalCode = postalCode;
 	}
 
 	public String getPostalCode() {
 		return postalCode;
+	}
+
+	@Override
+	public int compareTo(Place another) {		
+		int diff = (int) (this.getPrice() * 100 - another.getPrice() * 100);
+		diff += (int) (this.getDistance() - another.getDistance());
+		return diff;
 	}
 
 }
