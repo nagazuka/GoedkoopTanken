@@ -1,4 +1,4 @@
-package com.nagazuka.mobile.android.goedkooptanken.ui;
+package com.nagazuka.mobile.android.goedkooptanken;
 
 import android.app.Activity;
 import android.content.Intent;

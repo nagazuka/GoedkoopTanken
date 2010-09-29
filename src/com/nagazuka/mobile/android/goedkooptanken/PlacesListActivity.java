@@ -1,4 +1,4 @@
-package com.nagazuka.mobile.android.goedkooptanken.ui;
+package com.nagazuka.mobile.android.goedkooptanken;
 
 import java.net.URI;
 import java.util.ArrayList;

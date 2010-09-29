@@ -1,4 +1,4 @@
-package com.nagazuka.mobile.android.goedkooptanken.ui;
+package com.nagazuka.mobile.android.goedkooptanken;
 
 import java.util.Collections;
 import java.util.List;
