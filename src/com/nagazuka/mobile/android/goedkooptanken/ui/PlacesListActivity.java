@@ -1,4 +1,4 @@
-package com.nagazuka.mobile.android.goedkooptanken;
+package com.nagazuka.mobile.android.goedkooptanken.ui;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -25,12 +25,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
+import com.nagazuka.mobile.android.goedkooptanken.R;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesConstants;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesParams;
 import com.nagazuka.mobile.android.goedkooptanken.service.DownloadService;
-import com.nagazuka.mobile.android.goedkooptanken.service.GeoCodingService;
-import com.nagazuka.mobile.android.goedkooptanken.service.impl.GoogleGeocoder;
+import com.nagazuka.mobile.android.goedkooptanken.service.GeocodingService;
+import com.nagazuka.mobile.android.goedkooptanken.service.impl.GoogleGeocodingService;
 import com.nagazuka.mobile.android.goedkooptanken.service.impl.ZukaService;
 
 public class PlacesListActivity extends ListActivity {
@@ -162,12 +163,12 @@ public class PlacesListActivity extends ListActivity {
 	private class LocationTask extends AsyncTask<Void, Integer, String> {
 
 		private LocationManager m_locationManager = null;
-		private GeoCodingService m_geocodingService = null;
+		private GeocodingService m_geocodingService = null;
 
 		@Override
 		public void onPreExecute() {
 			m_locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-			m_geocodingService = new GoogleGeocoder();
+			m_geocodingService = new GoogleGeocodingService();
 
 			showDialog(DIALOG_PROGRESS);
 			m_progressDialog.setTitle(R.string.progressdialog_title_location);

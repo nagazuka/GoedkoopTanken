@@ -1,4 +1,4 @@
-package com.nagazuka.mobile.android.goedkooptanken;
+package com.nagazuka.mobile.android.goedkooptanken.ui;
 
 import android.location.Location;
 import android.os.Bundle;
@@ -7,6 +7,7 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
+import com.nagazuka.mobile.android.goedkooptanken.R;
 
 public class PlacesMapActivity extends MapActivity {
 

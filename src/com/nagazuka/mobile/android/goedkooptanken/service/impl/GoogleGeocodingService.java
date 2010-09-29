@@ -10,10 +10,10 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.util.Log;
 
-import com.nagazuka.mobile.android.goedkooptanken.GoedkoopTankenApp;
 import com.nagazuka.mobile.android.goedkooptanken.service.GeocodingService;
+import com.nagazuka.mobile.android.goedkooptanken.ui.GoedkoopTankenApp;
 
-public class GoogleGeocoder implements GeocodingService {
+public class GoogleGeocodingService implements GeocodingService {
 	private static final String TAG = "GoogleGeocoder";
 
 	@Override

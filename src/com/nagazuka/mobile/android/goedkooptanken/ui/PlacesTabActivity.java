@@ -1,5 +1,6 @@
-package com.nagazuka.mobile.android.goedkooptanken;
+package com.nagazuka.mobile.android.goedkooptanken.ui;
 
+import com.nagazuka.mobile.android.goedkooptanken.R;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesConstants;
 
 import android.app.TabActivity;
@@ -9,7 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TabHost;
 
-public class PlacesActivity extends TabActivity {
+public class PlacesTabActivity extends TabActivity {
 
 	private static final String TAG = "PlacesActivity";
 	private String mFuelChoice = "";

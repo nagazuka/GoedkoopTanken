@@ -1,8 +1,9 @@
-package com.nagazuka.mobile.android.goedkooptanken;
+package com.nagazuka.mobile.android.goedkooptanken.ui;
 
 import java.util.Collections;
 import java.util.List;
 
+import com.nagazuka.mobile.android.goedkooptanken.R;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 
 import android.content.Context;

@@ -1,4 +1,4 @@
-package com.nagazuka.mobile.android.goedkooptanken;
+package com.nagazuka.mobile.android.goedkooptanken.ui;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 
+import com.nagazuka.mobile.android.goedkooptanken.R;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesConstants;
 
 public class GoedkoopTankenActivity extends Activity {
@@ -30,7 +31,7 @@ public class GoedkoopTankenActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				Intent switchIntent = new Intent(v.getContext(),
-						PlacesActivity.class);
+						PlacesTabActivity.class);
 				Spinner spinner = (Spinner) findViewById(R.id.spinner);
 				String gasType = (String) spinner.getSelectedItem();
 				switchIntent.putExtra(PlacesConstants.INTENT_EXTRA_FUEL_CHOICE, gasType);
