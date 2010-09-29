@@ -106,7 +106,7 @@ public class PlacesListActivity extends ListActivity {
 
 			new LocationTask().execute();
 		}
-		
+
 		registerForContextMenu(getListView());
 	}
 
@@ -132,15 +132,16 @@ public class PlacesListActivity extends ListActivity {
 
 	private void openItemInGoogleMaps(int position) {
 		if (m_places != null) {
-			Place selectedItem = m_places.get(position);
+			Place selectedItem = m_places.get(position-1);
 			Uri geoUri = createGeoURI(selectedItem);
-			Intent mapCall = new Intent(Intent.ACTION_VIEW, geoUri);  
-			startActivity(mapCall);  
-	}		
+			Intent mapCall = new Intent(Intent.ACTION_VIEW, geoUri);
+			startActivity(mapCall);
+		}
 	}
 
-	private Uri createGeoURI(Place selectedItem) {
-		String geoUriString = "geo:0,0?q=Nederland";		  
+	private Uri createGeoURI(Place selectedItem) {		
+		String geoUriString = "geo:0,0?q=Nederland,";
+		geoUriString += selectedItem.getAddress() + "," + selectedItem.getPostalCode();
 		Uri geoUri = Uri.parse(geoUriString);
 		return geoUri;
 	}
