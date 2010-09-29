@@ -26,7 +26,7 @@ public class ZukaService implements DownloadService {
 
 	private static final String TAG = "PlacesDownloader";
 
-	private static final String URL_ZUKASERVICE = "http://zukaservice.appspot.com/goedkooptanken/1.0/";
+	private static final String URL_ZUKASERVICE = "http://zukaservice.appspot.com/goedkooptanken";
 
 	private static final String JSON_RESULTS = "results";
 	private static final String JSON_ADDRESS = "address";
@@ -34,7 +34,7 @@ public class ZukaService implements DownloadService {
 	private static final String JSON_PRICE = "price";
 	private static final String JSON_CONTEXT = "context";
 	private static final String JSON_CONTEXT_RESULT = "result";
-
+	private static final String JSON_POSTAL_CODE = "postalCode";			
 	private static final String JSON_DISTANCE = "distance";
 
 	public List<Place> fetchPlaces(PlacesParams params) {
@@ -100,51 +100,16 @@ public class ZukaService implements DownloadService {
 					JSONObject place = jsonPlaces.getJSONObject(i);
 
 					String address = place.getString(JSON_ADDRESS);
+					String postalCode = place.getString(JSON_POSTAL_CODE);
 					String name = place.getString(JSON_NAME);					
-					double price = parsePrice(place.getString(JSON_PRICE));
-					double distance = parseDistance(place.getString(JSON_DISTANCE));
-					Log.d(TAG, "<< Parsed price: " + price);
-					result.add(new Place(name, address, price, distance));
+					double price = place.getDouble(JSON_PRICE);
+					double distance = place.getDouble(JSON_DISTANCE);
+					
+					result.add(new Place(name, address, postalCode, price, distance));
 				}
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
-		}
-
-		return result;
-	}
-
-	private double parseDistance(String distanceStr) {
-		double result = 0.0;
-		if (distanceStr != null) {
-			String[] splitBySpace = distanceStr.split(" ");
-
-			if (splitBySpace.length == 2) {
-				String dblStr = splitBySpace[0];
-				try {
-					result = Double.parseDouble(dblStr);
-				} catch (NumberFormatException ex) {
-					Log.e(TAG, "<< Cannot parse distance string: " + distanceStr);
-				}
-			}
-		}
-
-		return result;
-	}
-
-	private double parsePrice(String currencyStr) {
-		double result = 0.0;
-		if (currencyStr != null) {
-			String[] splitBySpace = currencyStr.split(" ");
-
-			if (splitBySpace.length == 2) {
-				String priceStr = splitBySpace[1];
-				try {
-					result = Double.parseDouble(priceStr);
-				} catch (NumberFormatException ex) {
-					Log.e(TAG, "<< Cannot parse price string: " + priceStr);
-				}
-			}
 		}
 
 		return result;
