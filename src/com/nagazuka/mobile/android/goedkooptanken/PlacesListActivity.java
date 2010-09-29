@@ -11,7 +11,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.DialogInterface.OnCancelListener;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -155,18 +154,23 @@ public class PlacesListActivity extends ListActivity {
 		return places;
 	}
 
-	private void showExceptionAlert(Exception e) {
+	private void showExceptionAlert(String message, Exception e) {
 		if (e != null) {
 			Log.e(TAG, "<< Exception occurred in LocationTask: "
 					+ e.getMessage());
 		}
-		new AlertDialog.Builder(PlacesListActivity.this).setMessage(
-				"Locatie kan niet automatisch worden bepaald")
-				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						PlacesListActivity.this.finish();
-					}
-				}).show();
+
+		if (!PlacesListActivity.this.isFinishing()) {
+			new AlertDialog.Builder(PlacesListActivity.this).setMessage(
+					message)
+					.setPositiveButton("OK",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									PlacesListActivity.this.finish();
+								}
+							}).show();
+		}
 	}
 
 	private class LocationTask extends AsyncTask<Void, Integer, String> {
@@ -247,7 +251,7 @@ public class PlacesListActivity extends ListActivity {
 					|| m_postalCode.length() == 0) {
 				m_progressDialog.setProgress(MAX_PROGRESS);
 				m_progressDialog.dismiss();
-				showExceptionAlert(m_exception);
+				showExceptionAlert("Locatie kan niet automatisch worden bepaald", m_exception);
 			} else {
 				new DownloadTask().execute(m_fuelChoice, m_postalCode);
 			}
@@ -295,7 +299,7 @@ public class PlacesListActivity extends ListActivity {
 			m_progressDialog.dismiss();
 
 			if (m_exception != null) {
-				showExceptionAlert(m_exception);
+				showExceptionAlert("Tankstations kunnen niet worden gedownload", m_exception);
 			} else {
 				Log.d(TAG, "<< DownloadTask: result size = " + result.size()
 						+ ">>");
