@@ -18,6 +18,7 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
+import com.nagazuka.mobile.android.goedkooptanken.exception.GoedkoopTankenException;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesParams;
 import com.nagazuka.mobile.android.goedkooptanken.service.DownloadService;
@@ -34,38 +35,37 @@ public class ZukaService implements DownloadService {
 	private static final String JSON_PRICE = "price";
 	private static final String JSON_CONTEXT = "context";
 	private static final String JSON_CONTEXT_RESULT = "result";
-	private static final String JSON_POSTAL_CODE = "postalCode";			
+	private static final String JSON_POSTAL_CODE = "postalCode";
 	private static final String JSON_DISTANCE = "distance";
+	private static final String JSON_TOWN = "town";
 
-	public List<Place> fetchPlaces(PlacesParams params) {
-		String response = download(params);
-
-		List<Place> result = convertFromJSON(response);
+	public List<Place> fetchPlaces(PlacesParams params)
+			throws GoedkoopTankenException {
+		List<Place> result = Collections.emptyList();
+		try {
+			String response = download(params);
+			result = convertFromJSON(response);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new GoedkoopTankenException(
+					"Could not download places from ZukaService", e);
+		}
 		return result;
 	}
 
-	public String download(PlacesParams params) {
+	public String download(PlacesParams params) throws ClientProtocolException,
+			IOException {
+		String response = "";
+
 		HttpClient httpClient = new DefaultHttpClient();
-
 		HttpGet request = new HttpGet(constructURL(params));
-
 		Log.i(TAG, "<< HTTP Request: " + request.toString());
 
-		String response = "";
 		ResponseHandler<String> handler = new BasicResponseHandler();
-
-		try {
-			response = httpClient.execute(request, handler);
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		httpClient.getConnectionManager().shutdown();
-
+		response = httpClient.execute(request, handler);
 		Log.i(TAG, "<< HTTP Response: " + response);
 
+		httpClient.getConnectionManager().shutdown();
 		return response;
 	}
 
@@ -77,39 +77,38 @@ public class ZukaService implements DownloadService {
 		return URL + combinedParams;
 	}
 
-	public List<Place> convertFromJSON(String response) {
+	public List<Place> convertFromJSON(String response) throws JSONException {
 		List<Place> result = Collections.emptyList();
 
-		try {
-			JSONObject jsonResponse = new JSONObject(response);
+		JSONObject jsonResponse = new JSONObject(response);
 
-			if (jsonResponse.has(JSON_CONTEXT)) {
-				JSONObject context = jsonResponse.getJSONObject(JSON_CONTEXT);
-				if (!context.has(JSON_CONTEXT_RESULT)
-						|| !context.getString(JSON_CONTEXT_RESULT).equals(
-								"Success")) {
-					// THROW EXCEPTION
-				}
+		if (jsonResponse.has(JSON_CONTEXT)) {
+			JSONObject context = jsonResponse.getJSONObject(JSON_CONTEXT);
+			if (!context.has(JSON_CONTEXT_RESULT)
+					|| !context.getString(JSON_CONTEXT_RESULT)
+							.equals("Success")) {
+				// THROW EXCEPTION
 			}
+		}
 
-			if (jsonResponse.has(JSON_RESULTS)) {
-				result = new ArrayList<Place>();
-				JSONArray jsonPlaces = jsonResponse.getJSONArray(JSON_RESULTS);
+		if (jsonResponse.has(JSON_RESULTS)) {
+			result = new ArrayList<Place>();
+			JSONArray jsonPlaces = jsonResponse.getJSONArray(JSON_RESULTS);
 
-				for (int i = 0; i < jsonPlaces.length(); i++) {
-					JSONObject place = jsonPlaces.getJSONObject(i);
+			for (int i = 0; i < jsonPlaces.length(); i++) {
+				JSONObject place = jsonPlaces.getJSONObject(i);
 
-					String address = place.getString(JSON_ADDRESS);
-					String postalCode = place.getString(JSON_POSTAL_CODE);
-					String name = place.getString(JSON_NAME);					
-					double price = place.getDouble(JSON_PRICE);
-					double distance = place.getDouble(JSON_DISTANCE);
-					
-					result.add(new Place(name, address, postalCode, price, distance));
-				}
+				String address = place.getString(JSON_ADDRESS);
+				String postalCode = place.getString(JSON_POSTAL_CODE);
+				String town = place.getString(JSON_TOWN);
+				String name = place.getString(JSON_NAME);
+				double price = place.getDouble(JSON_PRICE);
+				double distance = place.getDouble(JSON_DISTANCE);
+
+				result
+						.add(new Place(name, address, postalCode, town, price,
+								distance));
 			}
-		} catch (JSONException e) {
-			e.printStackTrace();
 		}
 
 		return result;

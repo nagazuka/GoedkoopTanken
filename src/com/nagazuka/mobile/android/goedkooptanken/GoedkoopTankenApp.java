@@ -34,4 +34,5 @@ public class GoedkoopTankenApp extends Application {
 	public static Context getContext() {
 		return instance.getApplicationContext();		
 	}
+	
 }

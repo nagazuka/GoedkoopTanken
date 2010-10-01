@@ -45,6 +45,8 @@ public class PlacesAdapter extends ArrayAdapter<Place> {
 			TextView nameTextView = (TextView) v.findViewById(R.id.nametext);
 			TextView addressTextView = (TextView) v
 					.findViewById(R.id.addresstext);
+			TextView townTextView = (TextView) v
+			.findViewById(R.id.towntext);			
 			TextView priceTextView = (TextView) v.findViewById(R.id.pricetext);
 			TextView distanceTextView = (TextView) v.findViewById(R.id.distancetext);
 			if (nameTextView != null) {
@@ -52,6 +54,9 @@ public class PlacesAdapter extends ArrayAdapter<Place> {
 			}
 			if (addressTextView != null) {
 				addressTextView.setText(p.getAddress());
+			}
+			if (townTextView != null) {
+				townTextView.setText(p.getTown());
 			}
 			if (priceTextView != null) {
 				String priceStr = String.format("\u20AC %.2f", p.getPrice());
@@ -61,7 +66,6 @@ public class PlacesAdapter extends ArrayAdapter<Place> {
 				String priceStr = String.format("%.2f km", p.getDistance());
 				distanceTextView.setText(priceStr);
 			}
-
 		}
 
 		return v;

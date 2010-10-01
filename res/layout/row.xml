@@ -15,6 +15,9 @@
 			android:layout_height="0dip" android:layout_weight="1" android:id="@+id/addresstext"
 			android:gravity="right" android:singleLine="true" android:textSize="12sp" />
 		<TextView android:layout_width="fill_parent"
+			android:layout_height="0dip" android:layout_weight="1" android:id="@+id/towntext"
+			android:gravity="right" android:singleLine="true" android:textSize="12sp" />
+		<TextView android:layout_width="fill_parent"
 			android:layout_height="0dip" android:layout_weight="1" android:id="@+id/distancetext"
 			android:gravity="right" android:singleLine="true" android:textSize="12sp" />
 			

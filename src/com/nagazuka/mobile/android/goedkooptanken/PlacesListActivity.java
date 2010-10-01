@@ -11,6 +11,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -155,21 +156,25 @@ public class PlacesListActivity extends ListActivity {
 	}
 
 	private void showExceptionAlert(String message, Exception e) {
+		Resources res = getResources();
+		String exceptionMessage = "";
 		if (e != null) {
 			Log.e(TAG, "<< Exception occurred in LocationTask: "
 					+ e.getMessage());
+			exceptionMessage = e.getMessage();
+			message += "\n: Details: " + exceptionMessage;
 		}
 
 		if (!PlacesListActivity.this.isFinishing()) {
-			new AlertDialog.Builder(PlacesListActivity.this).setMessage(
-					message)
-					.setPositiveButton("OK",
+			new AlertDialog.Builder(PlacesListActivity.this)
+					.setTitle(res.getString(R.string.error_alert_title))
+					.setMessage(message).setPositiveButton(res.getString(R.string.error_alert_pos_button),
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int id) {
 									PlacesListActivity.this.finish();
-								}
-							}).show();
+								}})
+					.show();
 		}
 	}
 
@@ -251,7 +256,9 @@ public class PlacesListActivity extends ListActivity {
 					|| m_postalCode.length() == 0) {
 				m_progressDialog.setProgress(MAX_PROGRESS);
 				m_progressDialog.dismiss();
-				showExceptionAlert("Locatie kan niet automatisch worden bepaald", m_exception);
+				showExceptionAlert(
+						"Locatie kan niet automatisch worden bepaald",
+						m_exception);
 			} else {
 				new DownloadTask().execute(m_fuelChoice, m_postalCode);
 			}
@@ -299,7 +306,11 @@ public class PlacesListActivity extends ListActivity {
 			m_progressDialog.dismiss();
 
 			if (m_exception != null) {
-				showExceptionAlert("Tankstations kunnen niet worden gedownload", m_exception);
+				showExceptionAlert(
+						"Tankstations kunnen niet worden gedownload",
+						m_exception);
+			} else if (result == null || result.size() == 0) {
+				showExceptionAlert("Geen resultaten gevonden", m_exception);
 			} else {
 				Log.d(TAG, "<< DownloadTask: result size = " + result.size()
 						+ ">>");

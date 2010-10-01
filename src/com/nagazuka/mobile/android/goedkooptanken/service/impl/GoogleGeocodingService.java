@@ -11,13 +11,15 @@ import android.location.Geocoder;
 import android.util.Log;
 
 import com.nagazuka.mobile.android.goedkooptanken.GoedkoopTankenApp;
+import com.nagazuka.mobile.android.goedkooptanken.exception.GoedkoopTankenException;
 import com.nagazuka.mobile.android.goedkooptanken.service.GeocodingService;
 
 public class GoogleGeocodingService implements GeocodingService {
-	private static final String TAG = "GoogleGeocoder";
+	private static final String TAG = GoogleGeocodingService.class.getName();
 
 	@Override
-	public String getPostalCode(double latitude, double longitude) {
+	public String getPostalCode(double latitude, double longitude)
+			throws GoedkoopTankenException {
 		String postalCode = "";
 		Context context = GoedkoopTankenApp.getContext();
 
@@ -31,6 +33,8 @@ public class GoogleGeocodingService implements GeocodingService {
 		} catch (IOException e) {
 			Log.e(TAG, "<< Error looking up address with Geocoder >>");
 			e.printStackTrace();
+			throw new GoedkoopTankenException(
+					"Could not lookup address with Google Geocoder", e);
 		}
 
 		if (!adresses.isEmpty()) {
@@ -41,5 +45,4 @@ public class GoogleGeocodingService implements GeocodingService {
 
 		return postalCode;
 	}
-
 }
