@@ -16,6 +16,7 @@ import android.widget.TextView;
 public class PlacesAdapter extends ArrayAdapter<Place> {
 
 	private List<Place> items;
+	private LayoutInflater inflater;
 
 	public List<Place> getItems() {
 		return items;
@@ -30,44 +31,62 @@ public class PlacesAdapter extends ArrayAdapter<Place> {
 			List<Place> items) {
 		super(context, textViewResourceId, items);
 		this.setItems(items);
+        inflater = LayoutInflater.from(context);
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		View v = convertView;
-		if (v == null) {
-			LayoutInflater vi = (LayoutInflater) getContext().getSystemService(
-					Context.LAYOUT_INFLATER_SERVICE);
-			v = vi.inflate(R.layout.row, null);
+		ViewHolder holder;
+		if (convertView == null) {
+			convertView = inflater.inflate(R.layout.row, null);
+
+			holder = new ViewHolder();
+
+			holder.nameTextView = (TextView) convertView
+					.findViewById(R.id.nametext);
+			holder.addressTextView = (TextView) convertView
+					.findViewById(R.id.addresstext);
+			holder.townTextView = (TextView) convertView
+					.findViewById(R.id.towntext);
+			holder.priceTextView = (TextView) convertView
+					.findViewById(R.id.pricetext);
+			holder.distanceTextView = (TextView) convertView
+					.findViewById(R.id.distancetext);
+
+			convertView.setTag(holder);
+		} else {
+			holder = (ViewHolder) convertView.getTag();
 		}
+
 		Place p = items.get(position);
 		if (p != null) {
-			TextView nameTextView = (TextView) v.findViewById(R.id.nametext);
-			TextView addressTextView = (TextView) v
-					.findViewById(R.id.addresstext);
-			TextView townTextView = (TextView) v
-			.findViewById(R.id.towntext);			
-			TextView priceTextView = (TextView) v.findViewById(R.id.pricetext);
-			TextView distanceTextView = (TextView) v.findViewById(R.id.distancetext);
-			if (nameTextView != null) {
-				nameTextView.setText(p.getName());
+			if (holder.nameTextView != null) {
+				holder.nameTextView.setText(p.getName());
 			}
-			if (addressTextView != null) {
-				addressTextView.setText(p.getAddress());
+			if (holder.addressTextView != null) {
+				holder.addressTextView.setText(p.getAddress());
 			}
-			if (townTextView != null) {
-				townTextView.setText(p.getTown());
+			if (holder.townTextView != null) {
+				holder.townTextView.setText(p.getTown());
 			}
-			if (priceTextView != null) {
+			if (holder.priceTextView != null) {
 				String priceStr = String.format("\u20AC %.2f", p.getPrice());
-				priceTextView.setText(priceStr);
+				holder.priceTextView.setText(priceStr);
 			}
-			if (distanceTextView != null) {
+			if (holder.distanceTextView != null) {
 				String priceStr = String.format("%.2f km", p.getDistance());
-				distanceTextView.setText(priceStr);
+				holder.distanceTextView.setText(priceStr);
 			}
 		}
 
-		return v;
+		return convertView;
+	}
+
+	static class ViewHolder {
+		TextView nameTextView;
+		TextView addressTextView;
+		TextView townTextView;
+		TextView priceTextView;
+		TextView distanceTextView;
 	}
 }
