@@ -18,9 +18,10 @@ public class PlacesItemizedOverlay extends ItemizedOverlay<OverlayItem> {
 	}
 
 	public PlacesItemizedOverlay(Drawable defaultMarker, Context context) {
-		super(defaultMarker);
+		super(boundCenterBottom(defaultMarker));
 		mContext = context;
 	}
+
 	
 	@Override
 	protected boolean onTap(int index) {
