@@ -136,7 +136,8 @@ public class PlacesListActivity extends ListActivity {
 	private Uri createGeoURI(Place selectedItem) {
 		String geoUriString = "geo:0,0?q=Nederland, ";
 		geoUriString += selectedItem.getAddress() + ", "
-				+ selectedItem.getPostalCode();
+				+ selectedItem.getPostalCode() + "," 
+				+ selectedItem.getTown();
 		Log.d(TAG, "<< Geo Uri String [" + geoUriString + "]");
 		Uri geoUri = Uri.parse(geoUriString);
 		return geoUri;
