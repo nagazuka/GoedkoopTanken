@@ -77,17 +77,15 @@ public class ZukaService implements DownloadService {
 		return URL + combinedParams;
 	}
 
-	public List<Place> convertFromJSON(String response) throws JSONException {
+	public List<Place> convertFromJSON(String response) throws JSONException, GoedkoopTankenException {
 		List<Place> result = Collections.emptyList();
 
 		JSONObject jsonResponse = new JSONObject(response);
 
 		if (jsonResponse.has(JSON_CONTEXT)) {
 			JSONObject context = jsonResponse.getJSONObject(JSON_CONTEXT);
-			if (!context.has(JSON_CONTEXT_RESULT)
-					|| !context.getString(JSON_CONTEXT_RESULT)
-							.equals("Success")) {
-				// THROW EXCEPTION
+			if (!getJSONString(context, JSON_CONTEXT_RESULT).equals("Success")) {
+				throw new GoedkoopTankenException("ZukaService returned failed response", null);
 			}
 		}
 
@@ -98,19 +96,37 @@ public class ZukaService implements DownloadService {
 			for (int i = 0; i < jsonPlaces.length(); i++) {
 				JSONObject place = jsonPlaces.getJSONObject(i);
 
-				String address = place.getString(JSON_ADDRESS);
-				String postalCode = place.getString(JSON_POSTAL_CODE);
-				String town = place.getString(JSON_TOWN);
-				String name = place.getString(JSON_NAME);
-				double price = place.getDouble(JSON_PRICE);
-				double distance = place.getDouble(JSON_DISTANCE);
+				String address = getJSONString(place, JSON_ADDRESS);
+				String postalCode = getJSONString(place, JSON_POSTAL_CODE);
+				String town = getJSONString(place, JSON_TOWN);
+				String name = getJSONString(place, JSON_NAME);
+				double price = getJSONDouble(place, JSON_PRICE);
+				double distance = getJSONDouble(place, JSON_DISTANCE);
 
-				result
-						.add(new Place(name, address, postalCode, town, price,
-								distance));
+				result.add(new Place(name, address, postalCode, town, price,
+						distance));
 			}
 		}
+		return result;
+	}
 
+	private String getJSONString(JSONObject json, String key)
+			throws JSONException {
+		String result = "";
+
+		if (json.has(key)) {
+			result = json.getString(key);
+		}
+
+		return result;
+	}
+
+	private double getJSONDouble(JSONObject json, String key)
+			throws JSONException {
+		double result = 0.0;
+		if (json.has(key)) {
+			result = json.getDouble(key);
+		}
 		return result;
 	}
 }
