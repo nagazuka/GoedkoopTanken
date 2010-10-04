@@ -71,9 +71,14 @@ public class ZukaService implements DownloadService {
 
 	private static String constructURL(PlacesParams params) {
 		String URL = URL_ZUKASERVICE;
+		String postcode = params.getPostcode();
+		if (postcode != null && postcode.length() > 4) {
+			postcode = postcode.substring(0, 4);
+		}
+		
 		String combinedParams = "?brandstof="
 				+ URLEncoder.encode(params.getBrandstof()) + "&postcode="
-				+ params.getPostcode();
+				+ postcode;
 		return URL + combinedParams;
 	}
 

@@ -157,12 +157,12 @@ public class PlacesListActivity extends ListActivity {
 
 	private void showExceptionAlert(String message, Exception e) {
 		Resources res = getResources();
-		String exceptionMessage = "";
+		//String exceptionMessage = "";
 		if (e != null) {
-			Log.e(TAG, "<< Exception occurred in LocationTask: "
+			Log.e(TAG, "<< Exception occurred in LocationTask."
 					+ e.getMessage());
-			exceptionMessage = e.getMessage();
-			message += "\n: Details: " + exceptionMessage;
+			//exceptionMessage = e.getMessage();
+			//message += "\nDetails: " + exceptionMessage;
 		}
 
 		if (!PlacesListActivity.this.isFinishing()) {
