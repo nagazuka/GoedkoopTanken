@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.nagazuka.mobile.android.goedkooptanken.GoedkoopTankenApp;
 import com.nagazuka.mobile.android.goedkooptanken.exception.GoedkoopTankenException;
+import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.service.GeocodingService;
 
 public class GoogleGeocodingService implements GeocodingService {
@@ -37,12 +38,42 @@ public class GoogleGeocodingService implements GeocodingService {
 					"Could not lookup address with Google Geocoder", e);
 		}
 
-		if (!adresses.isEmpty()) {
+		if (adresses != null && !adresses.isEmpty()) {
 			Address address = adresses.get(0);
 			postalCode = address.getPostalCode();
 			Log.d(TAG, "<< Geocoder found postalCode: " + postalCode + ">>");
 		}
 
 		return postalCode;
+	}
+
+	@Override
+	public double[] getLocation(Place place) throws GoedkoopTankenException {
+		double[] result = { 0.0, 0.0 };
+
+		int maxResults = 1;
+		String address = place.getAddress();
+		String postalCode = place.getPostalCode();
+		String town = place.getTown();
+		String locationName = address + ", " + postalCode + ", " + town;
+
+		try {
+			Context context = GoedkoopTankenApp.getContext();
+			Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+			List<Address> addresses = geocoder.getFromLocationName(
+					locationName, maxResults);
+			if (addresses != null && !addresses.isEmpty()) {
+				Address location = addresses.get(0);
+				result[0] = location.getLatitude();
+				result[1] = location.getLongitude();
+			}
+		} catch (Exception e) {
+			Log.e(TAG, "<< Error looking up location name [" + locationName
+					+ "] with Geocoder >>");
+			e.printStackTrace();
+			throw new GoedkoopTankenException("Could not lookup location ["
+					+ locationName + "]with Google Geocoder", e);
+		}
+		return result;
 	}
 }
