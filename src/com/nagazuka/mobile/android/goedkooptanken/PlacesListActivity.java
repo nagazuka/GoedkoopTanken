@@ -35,7 +35,7 @@ import com.nagazuka.mobile.android.goedkooptanken.service.impl.ZukaService;
 
 public class PlacesListActivity extends ListActivity {
 
-	private static final String TAG = "PlacesListActivity";
+	private static final String TAG = PlacesListActivity.class.getName();
 
 	private PlacesAdapter m_adapter;
 	private ProgressDialog m_progressDialog;
@@ -318,6 +318,8 @@ public class PlacesListActivity extends ListActivity {
 
 				m_places.addAll(result);
 				m_adapter.notifyDataSetChanged();
+				
+				((GoedkoopTankenApp) getApplication()).setPlaces(m_places);
 			}
 
 		}
