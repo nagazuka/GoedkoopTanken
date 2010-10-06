@@ -59,8 +59,8 @@ public class PlacesMapActivity extends MapActivity {
 					"Dit is uw huidige locatie");
 
 			itemizedoverlay.addOverlay(overlayitem);
+			
 			mapOverlays.add(itemizedoverlay);
-
 			mc.animateTo(point);
 
 			// Geocode all places and place markers on map
@@ -107,14 +107,18 @@ public class PlacesMapActivity extends MapActivity {
 
 		@Override
 		protected void onProgressUpdate(Place... progress) {
-			GeoPoint point = progress[0].getPoint();
-			OverlayItem overlayitem = new OverlayItem(point, "Titel",
-			"Tekst");
-			itemizedoverlay.addOverlay(overlayitem);				
+			Place p = progress[0];
+			GeoPoint point = p.getPoint();
+			
+			OverlayItem overlayitem = new OverlayItem(point, p.getName(),
+			p.getSummary());
+			itemizedoverlay.addOverlay(overlayitem);			
+			mapView.invalidate();
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
+			mapView.invalidate();
 		}
 	}
 

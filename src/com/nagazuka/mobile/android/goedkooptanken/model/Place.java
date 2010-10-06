@@ -80,6 +80,15 @@ public class Place implements Comparable<Place> {
 	public GeoPoint getPoint() {
 		return point;
 	}
+	
+	public String getSummary() {
+		String result = getAddress() + "\n";
+		result += getPostalCode() + "\n";
+		result += getTown() + "\n";
+		result += String.format("Literprijs: \u20AC %.2f\n", getPrice());
+		result += String.format("Geschatte afstand: %.2f km\n", getDistance());		
+		return result; 
+	}
 
 	@Override
 	public int hashCode() {
