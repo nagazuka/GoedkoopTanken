@@ -1,5 +1,7 @@
 package com.nagazuka.mobile.android.goedkooptanken.model;
 
+import com.google.android.maps.GeoPoint;
+
 public class Place implements Comparable<Place> {
 	private double price = 0.0;
 	private double distance = 0.0;
@@ -7,11 +9,13 @@ public class Place implements Comparable<Place> {
 	private String address = "";
 	private String town = "";
 	private String postalCode = "";
+	private GeoPoint point = null;
 
 	public Place() {
 	}
 
-	public Place(String name, String address, String postalCode, String town, double price, double distance) {
+	public Place(String name, String address, String postalCode, String town,
+			double price, double distance) {
 		super();
 		this.price = price;
 		this.distance = distance;
@@ -67,6 +71,14 @@ public class Place implements Comparable<Place> {
 
 	public String getPostalCode() {
 		return postalCode;
+	}
+
+	public void setPoint(GeoPoint point) {
+		this.point = point;
+	}
+
+	public GeoPoint getPoint() {
+		return point;
 	}
 
 	@Override
@@ -125,11 +137,10 @@ public class Place implements Comparable<Place> {
 	}
 
 	@Override
-	public int compareTo(Place another) {		
+	public int compareTo(Place another) {
 		int diff = (int) (this.getPrice() * 100 - another.getPrice() * 100);
 		diff += (int) (this.getDistance() - another.getDistance());
 		return diff;
 	}
 
 }
-
