@@ -1,5 +1,6 @@
 package com.nagazuka.mobile.android.goedkooptanken;
 
+import java.util.Collections;
 import java.util.List;
 
 import android.graphics.drawable.Drawable;
@@ -15,6 +16,7 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
+import com.nagazuka.mobile.android.goedkooptanken.model.PlaceDistanceComparator;
 import com.nagazuka.mobile.android.goedkooptanken.service.GeocodingService;
 import com.nagazuka.mobile.android.goedkooptanken.service.impl.GoogleGeocodingService;
 
@@ -22,7 +24,7 @@ public class PlacesMapActivity extends MapActivity {
 
 	private static final String TAG = PlacesMapActivity.class.getName();
 	private MapView mapView;
-	
+
 	private GeocodingService m_geocodingService = new GoogleGeocodingService();;
 	private List<Overlay> mapOverlays = null;
 	private Drawable pinDrawable = null;
@@ -59,10 +61,10 @@ public class PlacesMapActivity extends MapActivity {
 					"Dit is uw huidige locatie");
 
 			itemizedoverlay.addOverlay(overlayitem);
-			
+
 			mapOverlays.add(itemizedoverlay);
 			mc.animateTo(point);
-
+			
 			// Geocode all places and place markers on map
 			new GeocodeTask().execute(places);
 		}
@@ -85,20 +87,23 @@ public class PlacesMapActivity extends MapActivity {
 		@Override
 		protected Void doInBackground(List<Place>... params) {
 			try {
-				for (Place p : params[0]) {
-					double[] latlong = m_geocodingService.getLocation(p);
-					
-					double latitude = latlong[0];
-					double longitude = latlong[1];
-					
-					GeoPoint point = new GeoPoint((int) (latitude * 1E6),
-							(int) (longitude * 1E6));
-					p.setPoint(point);
-					
+				List<Place> places = params[0];
+				Collections.sort(places, new PlaceDistanceComparator());
+				for (Place p : places) {
+					if (p.getPoint() == null) {
+						double[] latlong = m_geocodingService.getLocation(p);
+
+						double latitude = latlong[0];
+						double longitude = latlong[1];
+
+						GeoPoint point = new GeoPoint((int) (latitude * 1E6),
+								(int) (longitude * 1E6));
+						p.setPoint(point);
+					}
 					publishProgress(p);
 				}
 			} catch (Exception e) {
-				Log.e(TAG, "Unexpected exception in GeocodeTask");
+				Log.e(TAG, "Unexpected exception in GeocodeTask" + e.getMessage());
 				e.printStackTrace();
 				m_exception = e;
 			}
@@ -109,10 +114,10 @@ public class PlacesMapActivity extends MapActivity {
 		protected void onProgressUpdate(Place... progress) {
 			Place p = progress[0];
 			GeoPoint point = p.getPoint();
-			
-			OverlayItem overlayitem = new OverlayItem(point, p.getName(),
-			p.getSummary());
-			itemizedoverlay.addOverlay(overlayitem);			
+
+			OverlayItem overlayitem = new OverlayItem(point, p.getName(), p
+					.getSummary());
+			itemizedoverlay.addOverlay(overlayitem);
 			mapView.invalidate();
 		}
 
@@ -121,5 +126,4 @@ public class PlacesMapActivity extends MapActivity {
 			mapView.invalidate();
 		}
 	}
-
 }
