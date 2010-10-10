@@ -26,6 +26,7 @@ import android.widget.ListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
+import com.nagazuka.mobile.android.goedkooptanken.model.PlaceDistanceComparator;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesConstants;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesParams;
 import com.nagazuka.mobile.android.goedkooptanken.service.DownloadService;
@@ -38,6 +39,7 @@ public class PlacesListActivity extends ListActivity {
 	private static final String TAG = PlacesListActivity.class.getName();
 
 	private PlacesAdapter m_adapter;
+	private PlaceDistanceComparator comparator = new PlaceDistanceComparator();
 	private ProgressDialog m_progressDialog;
 
 	private List<Place> m_places = Collections.emptyList();
@@ -150,6 +152,7 @@ public class PlacesListActivity extends ListActivity {
 		List<Place> places = null;
 		if (m_places != null && m_places.size() > 0) {
 			places = m_places;
+			Collections.sort(places, comparator);
 		} else {
 			places = Collections.emptyList();
 		}

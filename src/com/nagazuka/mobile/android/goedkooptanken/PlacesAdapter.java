@@ -3,9 +3,6 @@ package com.nagazuka.mobile.android.goedkooptanken;
 import java.util.Collections;
 import java.util.List;
 
-import com.nagazuka.mobile.android.goedkooptanken.R;
-import com.nagazuka.mobile.android.goedkooptanken.model.Place;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,17 +10,21 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.nagazuka.mobile.android.goedkooptanken.model.Place;
+import com.nagazuka.mobile.android.goedkooptanken.model.PlacePriceDistanceComparator;
+
 public class PlacesAdapter extends ArrayAdapter<Place> {
 
 	private List<Place> items;
 	private LayoutInflater inflater;
+	private PlacePriceDistanceComparator comparator = new PlacePriceDistanceComparator();
 
 	public List<Place> getItems() {
 		return items;
 	}
 
 	private void setItems(List<Place> items) {
-		Collections.sort(items);
+		Collections.sort(items, comparator);
 		this.items = items;
 	}
 
