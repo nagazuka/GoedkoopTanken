@@ -59,11 +59,11 @@ public class ZukaService implements DownloadService {
 
 		HttpClient httpClient = new DefaultHttpClient();
 		HttpGet request = new HttpGet(constructURL(params));
-		Log.i(TAG, "<< HTTP Request: " + request.toString());
+		Log.d(TAG, "<< HTTP Request: " + request.toString());
 
 		ResponseHandler<String> handler = new BasicResponseHandler();
 		response = httpClient.execute(request, handler);
-		Log.i(TAG, "<< HTTP Response: " + response);
+		Log.d(TAG, "<< HTTP Response: " + response);
 
 		httpClient.getConnectionManager().shutdown();
 		return response;
