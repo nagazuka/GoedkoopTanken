@@ -57,8 +57,10 @@ public class PlacesMapActivity extends MapActivity {
 			pinDrawable = this.getResources().getDrawable(R.drawable.map_pin);
 			itemizedoverlay = new PlacesItemizedOverlay(pinDrawable, this);
 
-			OverlayItem overlayitem = new OverlayItem(point, "U bent hier",
-					"Dit is uw huidige locatie");
+			String currentLocationTitle = getResources().getString(R.string.current_location_title);
+			String currentLocationText = getResources().getString(R.string.current_location_text);
+			OverlayItem overlayitem = new OverlayItem(point, currentLocationTitle,
+					currentLocationText);
 
 			itemizedoverlay.addOverlay(overlayitem);
 
