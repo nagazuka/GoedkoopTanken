@@ -8,16 +8,15 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuItem;
@@ -25,12 +24,15 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
+import com.nagazuka.mobile.android.goedkooptanken.exception.LocationException;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlaceDistanceComparator;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesConstants;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesParams;
 import com.nagazuka.mobile.android.goedkooptanken.service.DownloadService;
 import com.nagazuka.mobile.android.goedkooptanken.service.GeocodingService;
+import com.nagazuka.mobile.android.goedkooptanken.service.LocationService;
+import com.nagazuka.mobile.android.goedkooptanken.service.impl.AndroidLocationService;
 import com.nagazuka.mobile.android.goedkooptanken.service.impl.GoogleGeocodingService;
 import com.nagazuka.mobile.android.goedkooptanken.service.impl.ZukaService;
 
@@ -138,8 +140,7 @@ public class PlacesListActivity extends ListActivity {
 	private Uri createGeoURI(Place selectedItem) {
 		String geoUriString = "geo:0,0?q=Nederland, ";
 		geoUriString += selectedItem.getAddress() + ", "
-				+ selectedItem.getPostalCode() + "," 
-				+ selectedItem.getTown();
+				+ selectedItem.getPostalCode() + "," + selectedItem.getTown();
 		Log.d(TAG, "<< Geo Uri String [" + geoUriString + "]");
 		Uri geoUri = Uri.parse(geoUriString);
 		return geoUri;
@@ -161,37 +162,67 @@ public class PlacesListActivity extends ListActivity {
 
 	private void showExceptionAlert(String message, Exception e) {
 		Resources res = getResources();
-		//String exceptionMessage = "";
 		if (e != null) {
 			Log.e(TAG, "<< Exception occurred in LocationTask."
 					+ e.getMessage());
-			//exceptionMessage = e.getMessage();
-			//message += "\nDetails: " + exceptionMessage;
 		}
 
 		if (!PlacesListActivity.this.isFinishing()) {
-			new AlertDialog.Builder(PlacesListActivity.this)
-					.setTitle(res.getString(R.string.error_alert_title))
-					.setMessage(message).setPositiveButton(res.getString(R.string.error_alert_pos_button),
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									PlacesListActivity.this.finish();
-								}})
-					.show();
+			if (e instanceof LocationException) {
+				showLocationExceptionAlert(message);
+			} else {
+				new AlertDialog.Builder(PlacesListActivity.this).setTitle(
+						res.getString(R.string.error_alert_title)).setMessage(
+						message).setPositiveButton(
+						res.getString(R.string.error_alert_pos_button),
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								PlacesListActivity.this.finish();
+							}
+						}).show();
+			}
+
 		}
+	}
+
+	private void showLocationExceptionAlert(String message) {
+		Resources res = getResources();
+
+		DialogInterface.OnClickListener back = new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				PlacesListActivity.this.finish();
+			}
+		};
+
+		DialogInterface.OnClickListener locationSettings = new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				Intent intent = new Intent(
+						Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+				startActivity(intent);
+			}
+		};
+
+		new AlertDialog.Builder(PlacesListActivity.this).setTitle(
+				res.getString(R.string.error_alert_title)).setMessage(message)
+				.setNegativeButton(
+						res.getString(R.string.error_alert_neg_button), back)
+				.setPositiveButton(
+						res.getString(R.string.error_alert_location_button),
+						locationSettings).show();
 	}
 
 	private class LocationTask extends AsyncTask<Void, Integer, String> {
 
 		private Exception m_exception = null;
 		private LocationManager m_locationManager = null;
+		private LocationService m_locationService = null;
 		private GeocodingService m_geocodingService = null;
 
 		@Override
 		public void onPreExecute() {
 			m_exception = null;
-			m_locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+			m_locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+			m_locationService = new AndroidLocationService(m_locationManager);
 			m_geocodingService = new GoogleGeocodingService();
 
 			showDialog(DIALOG_PROGRESS);
@@ -204,26 +235,13 @@ public class PlacesListActivity extends ListActivity {
 			String postalCode = "";
 
 			try {
-				Criteria criteria = new Criteria();
-				criteria.setAccuracy(Criteria.ACCURACY_FINE);
-				String provider = m_locationManager.getBestProvider(criteria,
-						true);
-				Log.d(TAG, "<< bestProvider: " + provider + ">>");
 
-				// Could be that location services are not enabled or not
-				// available
-				// on device
-				if (provider == null) {
-					return "";
-				}
-
-				Location location = m_locationManager
-						.getLastKnownLocation(provider);
-
-				((GoedkoopTankenApp) getApplication()).setLocation(location);
+				Location location = m_locationService.getCurrentLocation();
 
 				double latitude = location.getLatitude();
 				double longitude = location.getLongitude();
+
+				((GoedkoopTankenApp) getApplication()).setLocation(location);
 
 				Log.d(TAG, "<< Latitude: " + latitude + " Longitude: "
 						+ longitude + ">>");
@@ -321,7 +339,7 @@ public class PlacesListActivity extends ListActivity {
 
 				m_places.addAll(result);
 				m_adapter.notifyDataSetChanged();
-				
+
 				((GoedkoopTankenApp) getApplication()).setPlaces(m_places);
 			}
 

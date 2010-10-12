@@ -13,6 +13,8 @@
 	<string name="no_results">Geen tankstations gevonden</string>
 	<string name="error_alert_title">Fout opgetreden</string>
 	<string name="error_alert_pos_button">OK</string>
+	<string name="error_alert_neg_button">Terug</string>	
+	<string name="error_alert_location_button">Locatie instellingen</string>
 	<string name="current_location_title">U bent hier</string>
 	<string name="current_location_text">Dit is uw geschatte locatie</string>	
 </resources>
