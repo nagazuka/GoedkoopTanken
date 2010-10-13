@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.nagazuka.mobile.android.goedkooptanken.GoedkoopTankenApp;
 import com.nagazuka.mobile.android.goedkooptanken.exception.GoedkoopTankenException;
+import com.nagazuka.mobile.android.goedkooptanken.exception.NetworkException;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.service.GeocodingService;
 
@@ -34,8 +35,8 @@ public class GoogleGeocodingService implements GeocodingService {
 		} catch (IOException e) {
 			Log.e(TAG, "<< Error looking up address with Geocoder >>");
 			e.printStackTrace();
-			throw new GoedkoopTankenException(
-					"Could not lookup address with Google Geocoder", e);
+			throw new NetworkException(
+					"Uw postcode kan niet bepaald worden", e);
 		}
 
 		if (adresses != null && !adresses.isEmpty()) {

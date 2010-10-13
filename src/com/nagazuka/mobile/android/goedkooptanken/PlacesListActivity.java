@@ -287,7 +287,7 @@ public class PlacesListActivity extends ListActivity {
 				m_progressDialog.setProgress(MAX_PROGRESS);
 				m_progressDialog.dismiss();
 				showExceptionAlert(
-						"Locatie kan niet automatisch worden bepaald",
+						m_exception.getMessage(),
 						m_exception);
 			} else {
 				new DownloadTask().execute(m_fuelChoice, m_postalCode);
@@ -337,7 +337,7 @@ public class PlacesListActivity extends ListActivity {
 
 			if (m_exception != null) {
 				showExceptionAlert(
-						"Tankstations kunnen niet worden gedownload",
+						m_exception.getMessage(),
 						m_exception);
 			} else if (result == null || result.size() == 0) {
 				showExceptionAlert("Geen resultaten gevonden", m_exception);

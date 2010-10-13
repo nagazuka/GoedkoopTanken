@@ -68,7 +68,7 @@ public class ZukaService implements DownloadService {
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new NetworkException(
-					"Network error while downloading places from ZukaService",
+					"Er zijn netwerkproblemen opgetreden bij het downloaden van de tankstations",
 					e);
 
 		}

@@ -35,7 +35,7 @@ public class AndroidLocationService implements LocationService {
 		} catch (Exception e) {
 			Log.e(TAG,"<< Error find current location with Android Location Service >>");
 			e.printStackTrace();
-			throw new LocationException("Could not find current location with Android Location Service",e);
+			throw new LocationException("Uw huidige locatie kan niet automatisch bepaald worden",e);
 		}
 
 		return location;
