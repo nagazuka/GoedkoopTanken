@@ -39,6 +39,7 @@ public class ZukaService implements DownloadService {
 	private static final String JSON_POSTAL_CODE = "postalCode";
 	private static final String JSON_DISTANCE = "distance";
 	private static final String JSON_TOWN = "town";
+	private static final String JSON_DATE = "date";
 
 	public List<Place> fetchPlaces(PlacesParams params)
 			throws GoedkoopTankenException {
@@ -117,9 +118,10 @@ public class ZukaService implements DownloadService {
 					String name = getJSONString(place, JSON_NAME);
 					double price = getJSONDouble(place, JSON_PRICE);
 					double distance = getJSONDouble(place, JSON_DISTANCE);
+					String date = getJSONString(place, JSON_DATE);					
 
 					result.add(new Place(name, address, postalCode, town,
-							price, distance));
+							price, distance, date));
 				}
 			}
 		} catch (JSONException e) {

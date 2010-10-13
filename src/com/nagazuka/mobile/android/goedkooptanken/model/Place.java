@@ -9,13 +9,14 @@ public class Place {
 	private String address = "";
 	private String town = "";
 	private String postalCode = "";
+	private String observationDate = "";
 	private GeoPoint point = null;
 
 	public Place() {
 	}
 
 	public Place(String name, String address, String postalCode, String town,
-			double price, double distance) {
+			double price, double distance, String observationDate) {
 		super();
 		this.price = price;
 		this.distance = distance;
@@ -23,6 +24,7 @@ public class Place {
 		this.town = town;
 		this.name = name;
 		this.address = address;
+		this.observationDate = observationDate;
 	}
 
 	public void setTown(String town) {
@@ -86,7 +88,16 @@ public class Place {
 		result += getPostalCode() + "\n";
 		result += getTown() + "\n";
 		result += String.format("Literprijs: \u20AC %.2f\n", getPrice());
-		result += String.format("Geschatte afstand: %.2f km\n", getDistance());		
+		result += String.format("Geschatte afstand: %.2f km\n", getDistance());
+		result += "Peildatum " + getObservationDate() + "\n";
 		return result; 
+	}
+
+	public void setObservationDate(String observationDate) {
+		this.observationDate = observationDate;
+	}
+
+	public String getObservationDate() {
+		return observationDate;
 	}
 }
