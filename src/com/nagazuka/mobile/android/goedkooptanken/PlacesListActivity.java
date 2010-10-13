@@ -25,6 +25,7 @@ import android.widget.ListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import com.nagazuka.mobile.android.goedkooptanken.exception.LocationException;
+import com.nagazuka.mobile.android.goedkooptanken.exception.NetworkException;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlaceDistanceComparator;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesConstants;
@@ -50,7 +51,6 @@ public class PlacesListActivity extends ListActivity {
 
 	private static final int DIALOG_PROGRESS = 1;
 	private static final int MAX_PROGRESS = 100;
-
 	private static final int CONTEXT_MENU_MAPS_ID = 0;
 
 	@Override
@@ -168,24 +168,34 @@ public class PlacesListActivity extends ListActivity {
 		}
 
 		if (!PlacesListActivity.this.isFinishing()) {
-			if (e instanceof LocationException) {
-				showLocationExceptionAlert(message);
-			} else {
-				new AlertDialog.Builder(PlacesListActivity.this).setTitle(
-						res.getString(R.string.error_alert_title)).setMessage(
-						message).setPositiveButton(
-						res.getString(R.string.error_alert_pos_button),
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								PlacesListActivity.this.finish();
-							}
-						}).show();
+			if (e instanceof LocationException) {				
+				String buttonText = res.getString(R.string.error_alert_location_button);
+				showSettingsExceptionAlert(message,Settings.ACTION_LOCATION_SOURCE_SETTINGS, buttonText);
 			}
-
+			else if (e instanceof NetworkException) {
+				String buttonText = res.getString(R.string.error_alert_network_button);
+				showSettingsExceptionAlert(message,Settings.ACTION_WIRELESS_SETTINGS, buttonText);
+			} else {
+				showDefaultExceptionAlert(message);
+			}
 		}
 	}
-
-	private void showLocationExceptionAlert(String message) {
+	
+	private void showDefaultExceptionAlert(String message) {
+		Resources res = getResources();
+		
+		new AlertDialog.Builder(PlacesListActivity.this).setTitle(
+				res.getString(R.string.error_alert_title)).setMessage(
+				message).setPositiveButton(
+				res.getString(R.string.error_alert_pos_button),
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						PlacesListActivity.this.finish();
+					}
+				}).show();
+	}
+	
+	private void showSettingsExceptionAlert(final String message, final String settingsType, final String buttonText) {
 		Resources res = getResources();
 
 		DialogInterface.OnClickListener back = new DialogInterface.OnClickListener() {
@@ -197,7 +207,7 @@ public class PlacesListActivity extends ListActivity {
 		DialogInterface.OnClickListener locationSettings = new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
 				Intent intent = new Intent(
-						Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+						settingsType);
 				startActivity(intent);
 			}
 		};
@@ -207,10 +217,10 @@ public class PlacesListActivity extends ListActivity {
 				.setNegativeButton(
 						res.getString(R.string.error_alert_neg_button), back)
 				.setPositiveButton(
-						res.getString(R.string.error_alert_location_button),
+						buttonText,
 						locationSettings).show();
 	}
-
+	
 	private class LocationTask extends AsyncTask<Void, Integer, String> {
 
 		private Exception m_exception = null;
@@ -340,7 +350,6 @@ public class PlacesListActivity extends ListActivity {
 
 				((GoedkoopTankenApp) getApplication()).setPlaces(m_places);
 			}
-
 		}
 	}
 }

@@ -19,6 +19,7 @@ import org.json.JSONObject;
 import android.util.Log;
 
 import com.nagazuka.mobile.android.goedkooptanken.exception.GoedkoopTankenException;
+import com.nagazuka.mobile.android.goedkooptanken.exception.NetworkException;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesParams;
 import com.nagazuka.mobile.android.goedkooptanken.service.DownloadService;
@@ -42,30 +43,36 @@ public class ZukaService implements DownloadService {
 	public List<Place> fetchPlaces(PlacesParams params)
 			throws GoedkoopTankenException {
 		List<Place> result = Collections.emptyList();
-		try {
-			String response = download(params);
-			result = convertFromJSON(response);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new GoedkoopTankenException(
-					"Could not download places from ZukaService", e);
-		}
+		String response = download(params);
+		result = convertFromJSON(response);
 		return result;
 	}
 
-	public String download(PlacesParams params) throws ClientProtocolException,
-			IOException {
+	public String download(PlacesParams params) throws NetworkException {
 		String response = "";
+		try {
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpGet request = new HttpGet(constructURL(params));
+			Log.d(TAG, "<< HTTP Request: " + request.toString());
 
-		HttpClient httpClient = new DefaultHttpClient();
-		HttpGet request = new HttpGet(constructURL(params));
-		Log.d(TAG, "<< HTTP Request: " + request.toString());
+			ResponseHandler<String> handler = new BasicResponseHandler();
+			response = httpClient.execute(request, handler);
+			Log.d(TAG, "<< HTTP Response: " + response);
 
-		ResponseHandler<String> handler = new BasicResponseHandler();
-		response = httpClient.execute(request, handler);
-		Log.d(TAG, "<< HTTP Response: " + response);
+			httpClient.getConnectionManager().shutdown();
+		} catch (ClientProtocolException c) {
+			c.printStackTrace();
+			throw new NetworkException(
+					"HTTP Protocol error while downloading places from ZukaService",
+					c);
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new NetworkException(
+					"Network error while downloading places from ZukaService",
+					e);
 
-		httpClient.getConnectionManager().shutdown();
+		}
+
 		return response;
 	}
 
@@ -75,42 +82,50 @@ public class ZukaService implements DownloadService {
 		if (postcode != null && postcode.length() > 4) {
 			postcode = postcode.substring(0, 4);
 		}
-		
+
 		String combinedParams = "?brandstof="
 				+ URLEncoder.encode(params.getBrandstof()) + "&postcode="
 				+ postcode;
 		return URL + combinedParams;
 	}
 
-	public List<Place> convertFromJSON(String response) throws JSONException, GoedkoopTankenException {
+	public List<Place> convertFromJSON(String response)
+			throws GoedkoopTankenException {
 		List<Place> result = Collections.emptyList();
+		try {
+			JSONObject jsonResponse = new JSONObject(response);
 
-		JSONObject jsonResponse = new JSONObject(response);
-
-		if (jsonResponse.has(JSON_CONTEXT)) {
-			JSONObject context = jsonResponse.getJSONObject(JSON_CONTEXT);
-			if (!getJSONString(context, JSON_CONTEXT_RESULT).equals("Success")) {
-				throw new GoedkoopTankenException("ZukaService returned failed response", null);
+			if (jsonResponse.has(JSON_CONTEXT)) {
+				JSONObject context = jsonResponse.getJSONObject(JSON_CONTEXT);
+				if (!getJSONString(context, JSON_CONTEXT_RESULT).equals(
+						"Success")) {
+					throw new GoedkoopTankenException(
+							"ZukaService returned failed response", null);
+				}
 			}
-		}
 
-		if (jsonResponse.has(JSON_RESULTS)) {
-			result = new ArrayList<Place>();
-			JSONArray jsonPlaces = jsonResponse.getJSONArray(JSON_RESULTS);
+			if (jsonResponse.has(JSON_RESULTS)) {
+				result = new ArrayList<Place>();
+				JSONArray jsonPlaces = jsonResponse.getJSONArray(JSON_RESULTS);
 
-			for (int i = 0; i < jsonPlaces.length(); i++) {
-				JSONObject place = jsonPlaces.getJSONObject(i);
+				for (int i = 0; i < jsonPlaces.length(); i++) {
+					JSONObject place = jsonPlaces.getJSONObject(i);
 
-				String address = getJSONString(place, JSON_ADDRESS);
-				String postalCode = getJSONString(place, JSON_POSTAL_CODE);
-				String town = getJSONString(place, JSON_TOWN);
-				String name = getJSONString(place, JSON_NAME);
-				double price = getJSONDouble(place, JSON_PRICE);
-				double distance = getJSONDouble(place, JSON_DISTANCE);
+					String address = getJSONString(place, JSON_ADDRESS);
+					String postalCode = getJSONString(place, JSON_POSTAL_CODE);
+					String town = getJSONString(place, JSON_TOWN);
+					String name = getJSONString(place, JSON_NAME);
+					double price = getJSONDouble(place, JSON_PRICE);
+					double distance = getJSONDouble(place, JSON_DISTANCE);
 
-				result.add(new Place(name, address, postalCode, town, price,
-						distance));
+					result.add(new Place(name, address, postalCode, town,
+							price, distance));
+				}
 			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+			throw new GoedkoopTankenException(
+					"Could not parse JSON response from ZukaService", e);
 		}
 		return result;
 	}
