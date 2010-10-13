@@ -222,7 +222,7 @@ public class PlacesListActivity extends ListActivity {
 		public void onPreExecute() {
 			m_exception = null;
 			m_locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-			m_locationService = new AndroidLocationService(m_locationManager);
+			m_locationService = new AndroidLocationService();
 			m_geocodingService = new GoogleGeocodingService();
 
 			showDialog(DIALOG_PROGRESS);
@@ -235,8 +235,7 @@ public class PlacesListActivity extends ListActivity {
 			String postalCode = "";
 
 			try {
-
-				Location location = m_locationService.getCurrentLocation();
+				Location location = m_locationService.getCurrentLocation(m_locationManager);
 
 				double latitude = location.getLatitude();
 				double longitude = location.getLongitude();
@@ -253,7 +252,6 @@ public class PlacesListActivity extends ListActivity {
 						longitude);
 
 				publishProgress((int) (MAX_PROGRESS * 0.33));
-
 			} catch (Exception e) {
 				m_exception = e;
 			}
