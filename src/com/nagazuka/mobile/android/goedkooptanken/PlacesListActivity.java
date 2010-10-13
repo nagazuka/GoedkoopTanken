@@ -150,7 +150,7 @@ public class PlacesListActivity extends ListActivity {
 			
 			DialogInterface.OnClickListener back = new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
-					finish();
+					dialog.dismiss();
 				}
 			};
 			
