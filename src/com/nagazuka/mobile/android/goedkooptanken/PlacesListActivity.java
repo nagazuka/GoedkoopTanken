@@ -52,6 +52,7 @@ public class PlacesListActivity extends ListActivity {
 	private static final int DIALOG_PROGRESS = 1;
 	private static final int MAX_PROGRESS = 100;
 	private static final int CONTEXT_MENU_MAPS_ID = 0;
+	private static final int CONTEXT_MENU_DETAILS_ID = 1;
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
@@ -112,6 +113,7 @@ public class PlacesListActivity extends ListActivity {
 			ContextMenu.ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		menu.add(0, CONTEXT_MENU_MAPS_ID, 0, "Open in Google Maps");
+		menu.add(0, CONTEXT_MENU_DETAILS_ID, 1, "Bekijk details");
 	}
 
 	@Override
@@ -121,6 +123,9 @@ public class PlacesListActivity extends ListActivity {
 		switch (item.getItemId()) {
 		case CONTEXT_MENU_MAPS_ID:
 			openItemInGoogleMaps(info.position);
+			return true;
+		case CONTEXT_MENU_DETAILS_ID:
+			showDetailsDialog(info.position);
 			return true;
 		default:
 			return super.onContextItemSelected(item);
@@ -136,6 +141,27 @@ public class PlacesListActivity extends ListActivity {
 			startActivity(mapCall);
 		}
 	}
+	
+	private void showDetailsDialog(int position) {
+		Log.d(TAG, "<< Position selected [" + position + "]");
+		if (m_places != null) {
+			Place selectedItem = m_places.get(position);
+			String summary = selectedItem.getSummary();
+			
+			DialogInterface.OnClickListener back = new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					finish();
+				}
+			};
+			
+			new AlertDialog.Builder(PlacesListActivity.this)
+			.setTitle("Details")
+			.setMessage(summary)
+			.setPositiveButton("OK",back)
+			.show();
+			
+		}
+	}	
 
 	private Uri createGeoURI(Place selectedItem) {
 		String geoUriString = "geo:0,0?q=Nederland, ";
