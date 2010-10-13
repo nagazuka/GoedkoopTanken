@@ -16,7 +16,7 @@
 		<activity android:name=".PlacesMapActivity" android:label="@string/app_name" />
 		<uses-library android:name="com.google.android.maps" />
 	</application>
-	<uses-sdk android:minSdkVersion="4" />
+	<uses-sdk android:minSdkVersion="7" />
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 </manifest> 
