@@ -89,7 +89,7 @@ public class Place {
 		result += getTown() + "\n";
 		result += String.format("Literprijs: \u20AC %.2f\n", getPrice());
 		result += String.format("Geschatte afstand: %.2f km\n", getDistance());
-		result += "Peildatum " + getObservationDate() + "\n";
+		result += "Peildatum: " + getObservationDate() + "\n";
 		return result; 
 	}
 
