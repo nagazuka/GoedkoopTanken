@@ -65,6 +65,7 @@ public class PlacesMapActivity extends MapActivity {
 			itemizedoverlay.addOverlay(overlayitem);
 
 			mapOverlays.add(itemizedoverlay);
+			mc.setZoom(13);
 			mc.animateTo(point);
 			
 			// Geocode all places and place markers on map
