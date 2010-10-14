@@ -19,6 +19,8 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
@@ -28,6 +30,7 @@ import com.nagazuka.mobile.android.goedkooptanken.exception.LocationException;
 import com.nagazuka.mobile.android.goedkooptanken.exception.NetworkException;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlaceDistanceComparator;
+import com.nagazuka.mobile.android.goedkooptanken.model.PlacePriceDistanceComparator;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesConstants;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesParams;
 import com.nagazuka.mobile.android.goedkooptanken.service.DownloadService;
@@ -42,7 +45,9 @@ public class PlacesListActivity extends ListActivity {
 	private static final String TAG = PlacesListActivity.class.getName();
 
 	private PlacesAdapter m_adapter;
-	private PlaceDistanceComparator comparator = new PlaceDistanceComparator();
+	private PlaceDistanceComparator distanceComparator = new PlaceDistanceComparator();
+	private PlacePriceDistanceComparator priceDistanceComparator = new PlacePriceDistanceComparator();
+	
 	private ProgressDialog m_progressDialog;
 
 	private List<Place> m_places = Collections.emptyList();
@@ -115,6 +120,31 @@ public class PlacesListActivity extends ListActivity {
 		menu.add(0, CONTEXT_MENU_MAPS_ID, 0, "Open in Google Maps");
 		menu.add(0, CONTEXT_MENU_DETAILS_ID, 1, "Bekijk details");
 	}
+	
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    // Handle item selection
+	    switch (item.getItemId()) {
+	    case R.id.sort_distance:
+	        Collections.sort(m_places, distanceComparator);
+	        m_adapter.notifyDataSetChanged();
+	        return true;
+	    case R.id.sort_price:
+	        Collections.sort(m_places, priceDistanceComparator);
+	        m_adapter.notifyDataSetChanged();
+	        return true;
+	    default:
+	        return super.onOptionsItemSelected(item);
+	    }
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.layout.menu, menu);
+	    return true;
+	}
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
@@ -177,7 +207,7 @@ public class PlacesListActivity extends ListActivity {
 		List<Place> places = null;
 		if (m_places != null && m_places.size() > 0) {
 			places = m_places;
-			Collections.sort(places, comparator);
+			Collections.sort(places, distanceComparator);			
 		} else {
 			places = Collections.emptyList();
 		}

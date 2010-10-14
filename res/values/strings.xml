@@ -18,4 +18,6 @@
 	<string name="error_alert_network_button">Netwerk instellingen</string>
 	<string name="current_location_title">U bent hier</string>
 	<string name="current_location_text">Dit is uw geschatte locatie</string>	
+	<string name="sort_price">Sorteren op prijs</string>
+	<string name="sort_distance">Sorteren op afstand</string>
 </resources>
