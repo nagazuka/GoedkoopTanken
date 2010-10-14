@@ -36,7 +36,7 @@ public class GoogleGeocodingService implements GeocodingService {
 			Log.e(TAG, "<< Error looking up address with Geocoder >>");
 			e.printStackTrace();
 			throw new NetworkException(
-					"Uw postcode kan niet bepaald worden", e);
+					"Uw postcode kan niet bepaald worden. Toegang tot het internet is vereist.", e);
 		}
 
 		if (adresses != null && !adresses.isEmpty()) {
