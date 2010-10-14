@@ -64,7 +64,7 @@ public class ZukaService implements DownloadService {
 		} catch (ClientProtocolException c) {
 			c.printStackTrace();
 			throw new NetworkException(
-					"HTTP Protocol error while downloading places from ZukaService",
+					"Er zijn networkproblemen opgetreden bij het downloaden van de tankstationsH",
 					c);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -101,7 +101,7 @@ public class ZukaService implements DownloadService {
 				if (!getJSONString(context, JSON_CONTEXT_RESULT).equals(
 						"Success")) {
 					throw new GoedkoopTankenException(
-							"ZukaService returned failed response", null);
+							"Geen resultaten gevonden voor zoekopdracht", null);
 				}
 			}
 
@@ -127,7 +127,7 @@ public class ZukaService implements DownloadService {
 		} catch (JSONException e) {
 			e.printStackTrace();
 			throw new GoedkoopTankenException(
-					"Could not parse JSON response from ZukaService", e);
+					"Geen resultaten gevonden voor zoekopdracht", e);
 		}
 		return result;
 	}
