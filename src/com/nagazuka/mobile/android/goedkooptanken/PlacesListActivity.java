@@ -141,27 +141,25 @@ public class PlacesListActivity extends ListActivity {
 			startActivity(mapCall);
 		}
 	}
-	
+
 	private void showDetailsDialog(int position) {
 		Log.d(TAG, "<< Position selected [" + position + "]");
 		if (m_places != null) {
 			Place selectedItem = m_places.get(position);
 			String summary = selectedItem.getSummary();
-			
+
 			DialogInterface.OnClickListener back = new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					dialog.dismiss();
 				}
 			};
-			
+
 			new AlertDialog.Builder(PlacesListActivity.this)
-			.setTitle("Details")
-			.setMessage(summary)
-			.setPositiveButton("OK",back)
-			.show();
-			
+					.setTitle("Details").setMessage(summary).setPositiveButton(
+							"OK", back).show();
+
 		}
-	}	
+	}
 
 	private Uri createGeoURI(Place selectedItem) {
 		String geoUriString = "geo:0,0?q=Nederland, ";
@@ -194,34 +192,38 @@ public class PlacesListActivity extends ListActivity {
 		}
 
 		if (!PlacesListActivity.this.isFinishing()) {
-			if (e instanceof LocationException) {				
-				String buttonText = res.getString(R.string.error_alert_location_button);
-				showSettingsExceptionAlert(message,Settings.ACTION_LOCATION_SOURCE_SETTINGS, buttonText);
-			}
-			else if (e instanceof NetworkException) {
-				String buttonText = res.getString(R.string.error_alert_network_button);
-				showSettingsExceptionAlert(message,Settings.ACTION_WIRELESS_SETTINGS, buttonText);
+			if (e instanceof LocationException) {
+				String buttonText = res
+						.getString(R.string.error_alert_location_button);
+				showSettingsExceptionAlert(message,
+						Settings.ACTION_LOCATION_SOURCE_SETTINGS, buttonText);
+			} else if (e instanceof NetworkException) {
+				String buttonText = res
+						.getString(R.string.error_alert_network_button);
+				showSettingsExceptionAlert(message,
+						Settings.ACTION_WIRELESS_SETTINGS, buttonText);
 			} else {
 				showDefaultExceptionAlert(message);
 			}
 		}
 	}
-	
+
 	private void showDefaultExceptionAlert(String message) {
 		Resources res = getResources();
-		
+
 		new AlertDialog.Builder(PlacesListActivity.this).setTitle(
-				res.getString(R.string.error_alert_title)).setMessage(
-				message).setPositiveButton(
-				res.getString(R.string.error_alert_pos_button),
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						PlacesListActivity.this.finish();
-					}
-				}).show();
+				res.getString(R.string.error_alert_title)).setMessage(message)
+				.setPositiveButton(
+						res.getString(R.string.error_alert_pos_button),
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								PlacesListActivity.this.finish();
+							}
+						}).show();
 	}
-	
-	private void showSettingsExceptionAlert(final String message, final String settingsType, final String buttonText) {
+
+	private void showSettingsExceptionAlert(final String message,
+			final String settingsType, final String buttonText) {
 		Resources res = getResources();
 
 		DialogInterface.OnClickListener back = new DialogInterface.OnClickListener() {
@@ -232,8 +234,7 @@ public class PlacesListActivity extends ListActivity {
 
 		DialogInterface.OnClickListener locationSettings = new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
-				Intent intent = new Intent(
-						settingsType);
+				Intent intent = new Intent(settingsType);
 				startActivity(intent);
 			}
 		};
@@ -242,11 +243,9 @@ public class PlacesListActivity extends ListActivity {
 				res.getString(R.string.error_alert_title)).setMessage(message)
 				.setNegativeButton(
 						res.getString(R.string.error_alert_neg_button), back)
-				.setPositiveButton(
-						buttonText,
-						locationSettings).show();
+				.setPositiveButton(buttonText, locationSettings).show();
 	}
-	
+
 	private class LocationTask extends AsyncTask<Void, Integer, String> {
 
 		private Exception m_exception = null;
@@ -271,7 +270,8 @@ public class PlacesListActivity extends ListActivity {
 			String postalCode = "";
 
 			try {
-				Location location = m_locationService.getCurrentLocation(m_locationManager);
+				Location location = m_locationService
+						.getCurrentLocation(m_locationManager);
 
 				double latitude = location.getLatitude();
 				double longitude = location.getLongitude();
@@ -308,13 +308,16 @@ public class PlacesListActivity extends ListActivity {
 			Log.d(TAG, "<< LocationTask: mFuelChoice " + m_fuelChoice
 					+ " m_postalCode " + m_postalCode + ">>");
 
-			if (m_exception != null || m_postalCode == null
-					|| m_postalCode.length() == 0) {
+			if (m_exception != null) {
 				m_progressDialog.setProgress(MAX_PROGRESS);
 				m_progressDialog.dismiss();
-				showExceptionAlert(
-						m_exception.getMessage(),
-						m_exception);
+
+				showExceptionAlert(m_exception.getMessage(), m_exception);
+			} else if (m_postalCode == null || m_postalCode.length() == 0) {
+				m_progressDialog.setProgress(MAX_PROGRESS);
+				m_progressDialog.dismiss();
+
+				showExceptionAlert("Postcode onbekend, kan tankstations niet downloaden",null);
 			} else {
 				new DownloadTask().execute(m_fuelChoice, m_postalCode);
 			}
@@ -362,9 +365,7 @@ public class PlacesListActivity extends ListActivity {
 			m_progressDialog.dismiss();
 
 			if (m_exception != null) {
-				showExceptionAlert(
-						m_exception.getMessage(),
-						m_exception);
+				showExceptionAlert(m_exception.getMessage(), m_exception);
 			} else if (result == null || result.size() == 0) {
 				showExceptionAlert("Geen resultaten gevonden", m_exception);
 			} else {
