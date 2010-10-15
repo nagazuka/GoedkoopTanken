@@ -25,9 +25,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import com.nagazuka.mobile.android.goedkooptanken.exception.LocationException;
@@ -64,6 +66,35 @@ public class PlacesListActivity extends ListActivity {
 	private static final int MAX_PROGRESS = 100;
 	private static final int CONTEXT_MENU_MAPS_ID = 0;
 	private static final int CONTEXT_MENU_DETAILS_ID = 1;
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.list);
+		// Check whether places have been downloaded before
+		// to avoid expensive loading on screen orientation change
+		final Object data = getLastNonConfigurationInstance();
+		final List<Place> downloadedPlaces = (List<Place>) data;
+
+		if (downloadedPlaces != null && downloadedPlaces.size() > 0) {
+			m_places = downloadedPlaces;
+			m_adapter = new PlacesAdapter(this, R.layout.row, m_places);
+			setListAdapter(m_adapter);
+		} else {
+			m_fuelChoice = getIntent().getStringExtra(
+					PlacesConstants.INTENT_EXTRA_FUEL_CHOICE);
+			ListView listView = getListView();			
+			listView.setTextFilterEnabled(true);
+
+			m_places = new ArrayList<Place>();
+			m_adapter = new PlacesAdapter(this, R.layout.row, m_places);
+			setListAdapter(m_adapter);
+
+			new LocationTask().execute();
+		}
+
+		registerForContextMenu(getListView());
+	}
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
@@ -127,35 +158,6 @@ public class PlacesListActivity extends ListActivity {
 		return dialog;
 	}
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
-		// Check whether places have been downloaded before
-		// to avoid expensive loading on screen orientation change
-		final Object data = getLastNonConfigurationInstance();
-		final List<Place> downloadedPlaces = (List<Place>) data;
-
-		if (downloadedPlaces != null && downloadedPlaces.size() > 0) {
-			m_places = downloadedPlaces;
-			m_adapter = new PlacesAdapter(this, R.layout.row, m_places);
-			setListAdapter(m_adapter);
-		} else {
-			m_fuelChoice = getIntent().getStringExtra(
-					PlacesConstants.INTENT_EXTRA_FUEL_CHOICE);
-
-			ListView listView = getListView();
-			listView.setTextFilterEnabled(true);
-
-			m_places = new ArrayList<Place>();
-			m_adapter = new PlacesAdapter(this, R.layout.row, m_places);
-			setListAdapter(m_adapter);
-
-			new LocationTask().execute();
-		}
-
-		registerForContextMenu(getListView());
-	}
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
@@ -447,12 +449,16 @@ public class PlacesListActivity extends ListActivity {
 			if (m_exception != null) {
 				showExceptionAlert(m_exception.getMessage(), m_exception);
 			} else if (result == null || result.size() == 0) {
-				showExceptionAlert("Geen resultaten gevonden", m_exception);
+				//showExceptionAlert("Geen resultaten gevonden", m_exception);
+				m_places.clear();
+				m_adapter.notifyDataSetChanged();
+				Log.d(TAG, "<< Is Adapter empty: " + m_adapter.isEmpty());
+				((GoedkoopTankenApp) getApplication()).setPlaces(m_places);
 			} else {
 				Log.d(TAG, "<< DownloadTask: result size = " + result.size()
 						+ ">>");
 				
-				m_places.removeAll(m_places);
+				m_places.clear();
 				m_places.addAll(result);
 				m_adapter.notifyDataSetChanged();
 
