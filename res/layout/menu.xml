@@ -4,4 +4,6 @@
           android:title="@string/sort_price" />
     <item android:id="@+id/sort_distance"          
           android:title="@string/sort_distance" />
+    <item android:id="@+id/search_postalcode"          
+          android:title="@string/search_postalcode" />
 </menu>

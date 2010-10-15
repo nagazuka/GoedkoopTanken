@@ -13,6 +13,7 @@
 	<string name="no_results">Geen tankstations gevonden</string>
 	<string name="error_alert_title">Fout opgetreden</string>
 	<string name="error_alert_pos_button">OK</string>
+	<string name="error_alert_search_button">Zoek</string>
 	<string name="error_alert_neg_button">Terug</string>	
 	<string name="error_alert_location_button">Locatie instellingen</string>
 	<string name="error_alert_network_button">Netwerk instellingen</string>
@@ -20,4 +21,5 @@
 	<string name="current_location_text">Dit is uw geschatte locatie</string>	
 	<string name="sort_price">Sorteren op prijs</string>
 	<string name="sort_distance">Sorteren op afstand</string>
+	<string name="search_postalcode">Zoeken op postcode</string>
 </resources>

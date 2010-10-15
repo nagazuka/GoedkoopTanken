@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -19,10 +20,13 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
@@ -55,6 +59,8 @@ public class PlacesListActivity extends ListActivity {
 	private String m_fuelChoice = "";
 
 	private static final int DIALOG_PROGRESS = 1;
+	private static final int DIALOG_SEARCH = 2;
+
 	private static final int MAX_PROGRESS = 100;
 	private static final int CONTEXT_MENU_MAPS_ID = 0;
 	private static final int CONTEXT_MENU_DETAILS_ID = 1;
@@ -63,22 +69,60 @@ public class PlacesListActivity extends ListActivity {
 	protected Dialog onCreateDialog(int id) {
 		Dialog dialog = null;
 		switch (id) {
-		case DIALOG_PROGRESS:
-			m_progressDialog = new ProgressDialog(PlacesListActivity.this);
-			m_progressDialog.setIcon(R.drawable.ic_gps_satellite);
-			m_progressDialog.setTitle(R.string.progressdialog_title_location);
-			m_progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-			m_progressDialog.setMax(MAX_PROGRESS);
-			m_progressDialog.setButton2(
-					getText(R.string.progressdialog_cancel),
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog,
-								int whichButton) {
+      case DIALOG_PROGRESS:
+        m_progressDialog = new ProgressDialog(PlacesListActivity.this);
+        m_progressDialog.setIcon(R.drawable.ic_gps_satellite);
+        m_progressDialog.setTitle(R.string.progressdialog_title_location);
+        m_progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        m_progressDialog.setMax(MAX_PROGRESS);
+        m_progressDialog.setButton2(
+            getText(R.string.progressdialog_cancel),
+            new DialogInterface.OnClickListener() {
+              public void onClick(DialogInterface dialog,
+                int whichButton) {
 
-							/* User clicked No so do some stuff */
-						}
-					});
-			dialog = m_progressDialog;
+                /* User clicked No so do some stuff */
+              }
+            });
+        dialog = m_progressDialog;
+        break;
+      case DIALOG_SEARCH:
+		Context mContext = getApplicationContext();
+		LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
+		View layout = inflater.inflate(R.layout.search_dialog, null);		                               
+
+		final EditText text = (EditText) layout.findViewById(R.id.search_postalcode_text);
+		
+		ImageView image = (ImageView) layout.findViewById(R.id.ic_search_dialog);
+		image.setImageResource(R.drawable.ic_mail);
+		
+		DialogInterface.OnClickListener close = new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				dialog.dismiss();
+			}
+		};
+		
+		DialogInterface.OnClickListener search = new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				String inputString = text.getText().toString();
+				if (inputString.length() == 4) {
+					m_postalCode = inputString;
+					new DownloadTask().execute(m_fuelChoice, m_postalCode);
+				}
+				dialog.dismiss();
+			}
+		};
+
+  		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setView(layout);
+		builder.setTitle(R.string.search_postalcode);
+		builder.setPositiveButton(R.string.error_alert_search_button, search);
+		builder.setNegativeButton(R.string.error_alert_neg_button, close);
+		dialog = builder.create();
+
+        break;
+      default:
+        dialog = null;
 		}
 		return dialog;
 	}
@@ -134,11 +178,14 @@ public class PlacesListActivity extends ListActivity {
 	        Collections.sort(m_places, priceDistanceComparator);
 	        m_adapter.notifyDataSetChanged();
 	        return true;
+	    case R.id.search_postalcode:
+	    	showDialog(DIALOG_SEARCH);
+	        return true;
 	    default:
 	        return super.onOptionsItemSelected(item);
 	    }
 	}
-
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 	    MenuInflater inflater = getMenuInflater();
@@ -360,6 +407,9 @@ public class PlacesListActivity extends ListActivity {
 		@Override
 		protected void onPreExecute() {
 			m_exception = null;
+			Log.d(TAG, "<< m_progressDialog: " + m_progressDialog);
+			
+			showDialog(DIALOG_PROGRESS);
 			m_progressDialog.setTitle(R.string.progressdialog_title_download);
 		}
 
@@ -392,7 +442,7 @@ public class PlacesListActivity extends ListActivity {
 		@Override
 		protected void onPostExecute(List<Place> result) {
 			m_progressDialog.setProgress(MAX_PROGRESS);
-			m_progressDialog.dismiss();
+			m_progressDialog.dismiss();			
 
 			if (m_exception != null) {
 				showExceptionAlert(m_exception.getMessage(), m_exception);
@@ -401,7 +451,8 @@ public class PlacesListActivity extends ListActivity {
 			} else {
 				Log.d(TAG, "<< DownloadTask: result size = " + result.size()
 						+ ">>");
-
+				
+				m_places.removeAll(m_places);
 				m_places.addAll(result);
 				m_adapter.notifyDataSetChanged();
 
