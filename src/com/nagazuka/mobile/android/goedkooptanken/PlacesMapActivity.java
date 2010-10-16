@@ -28,7 +28,9 @@ public class PlacesMapActivity extends MapActivity {
 	private GeocodingService m_geocodingService = new GoogleGeocodingService();;
 	private List<Overlay> mapOverlays = null;
 	private Drawable pinDrawable = null;
+	private Drawable userDrawable = null;	
 	private PlacesItemizedOverlay itemizedoverlay = null;
+	private PlacesItemizedOverlay userOverlay = null;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -55,16 +57,20 @@ public class PlacesMapActivity extends MapActivity {
 
 			mapOverlays = mapView.getOverlays();
 			pinDrawable = this.getResources().getDrawable(R.drawable.map_pin);
+			userDrawable  = this.getResources().getDrawable(R.drawable.ic_robot);
+
+			userOverlay = new PlacesItemizedOverlay(userDrawable, this);
 			itemizedoverlay = new PlacesItemizedOverlay(pinDrawable, this);
 
 			String currentLocationTitle = getResources().getString(R.string.current_location_title);
 			String currentLocationText = getResources().getString(R.string.current_location_text);
 			OverlayItem overlayitem = new OverlayItem(point, currentLocationTitle,
 					currentLocationText);
-
-			itemizedoverlay.addOverlay(overlayitem);
-
+			
+			userOverlay.addOverlay(overlayitem);
+			mapOverlays.add(userOverlay);
 			mapOverlays.add(itemizedoverlay);
+			
 			mc.setZoom(13);
 			mc.animateTo(point);
 			

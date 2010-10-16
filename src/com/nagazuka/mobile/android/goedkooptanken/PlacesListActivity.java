@@ -53,7 +53,7 @@ public class PlacesListActivity extends ListActivity {
 	private PlacesAdapter m_adapter;
 	private PlaceDistanceComparator distanceComparator = new PlaceDistanceComparator();
 	private PlacePriceDistanceComparator priceDistanceComparator = new PlacePriceDistanceComparator();
-	
+
 	private ProgressDialog m_progressDialog;
 
 	private List<Place> m_places = Collections.emptyList();
@@ -66,7 +66,7 @@ public class PlacesListActivity extends ListActivity {
 	private static final int MAX_PROGRESS = 100;
 	private static final int CONTEXT_MENU_MAPS_ID = 0;
 	private static final int CONTEXT_MENU_DETAILS_ID = 1;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -83,7 +83,7 @@ public class PlacesListActivity extends ListActivity {
 		} else {
 			m_fuelChoice = getIntent().getStringExtra(
 					PlacesConstants.INTENT_EXTRA_FUEL_CHOICE);
-			ListView listView = getListView();			
+			ListView listView = getListView();
 			listView.setTextFilterEnabled(true);
 
 			m_places = new ArrayList<Place>();
@@ -100,64 +100,67 @@ public class PlacesListActivity extends ListActivity {
 	protected Dialog onCreateDialog(int id) {
 		Dialog dialog = null;
 		switch (id) {
-      case DIALOG_PROGRESS:
-        m_progressDialog = new ProgressDialog(PlacesListActivity.this);
-        m_progressDialog.setIcon(R.drawable.ic_gps_satellite);
-        m_progressDialog.setTitle(R.string.progressdialog_title_location);
-        m_progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        m_progressDialog.setMax(MAX_PROGRESS);
-        m_progressDialog.setButton2(
-            getText(R.string.progressdialog_cancel),
-            new DialogInterface.OnClickListener() {
-              public void onClick(DialogInterface dialog,
-                int whichButton) {
+		case DIALOG_PROGRESS:
+			m_progressDialog = new ProgressDialog(PlacesListActivity.this);
+			m_progressDialog.setIcon(R.drawable.ic_gps_satellite);
+			m_progressDialog.setTitle(R.string.progressdialog_title_location);
+			m_progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+			m_progressDialog.setMax(MAX_PROGRESS);
+			m_progressDialog.setButton2(
+					getText(R.string.progressdialog_cancel),
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog,
+								int whichButton) {
 
-                /* User clicked No so do some stuff */
-              }
-            });
-        dialog = m_progressDialog;
-        break;
-      case DIALOG_SEARCH:
-		Context mContext = getApplicationContext();
-		LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
-		View layout = inflater.inflate(R.layout.search_dialog, null);		                               
+							/* User clicked No so do some stuff */
+						}
+					});
+			dialog = m_progressDialog;
+			break;
+		case DIALOG_SEARCH:
+			Context mContext = getApplicationContext();
+			LayoutInflater inflater = (LayoutInflater) mContext
+					.getSystemService(LAYOUT_INFLATER_SERVICE);
+			View layout = inflater.inflate(R.layout.search_dialog, null);
 
-		final EditText text = (EditText) layout.findViewById(R.id.search_postalcode_text);
-		
-		ImageView image = (ImageView) layout.findViewById(R.id.ic_search_dialog);
-		image.setImageResource(R.drawable.ic_mail);
-		
-		DialogInterface.OnClickListener close = new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				dialog.dismiss();
-			}
-		};
-		
-		DialogInterface.OnClickListener search = new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				String inputString = text.getText().toString();
-				if (inputString.length() == 4) {
-					m_postalCode = inputString;
-					new DownloadTask().execute(m_fuelChoice, m_postalCode);
+			final EditText text = (EditText) layout
+					.findViewById(R.id.search_postalcode_text);
+
+			ImageView image = (ImageView) layout
+					.findViewById(R.id.ic_search_dialog);
+			image.setImageResource(R.drawable.ic_mail);
+
+			DialogInterface.OnClickListener close = new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					dialog.dismiss();
 				}
-				dialog.dismiss();
-			}
-		};
+			};
 
-  		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setView(layout);
-		builder.setTitle(R.string.search_postalcode);
-		builder.setPositiveButton(R.string.error_alert_search_button, search);
-		builder.setNegativeButton(R.string.error_alert_neg_button, close);
-		dialog = builder.create();
+			DialogInterface.OnClickListener search = new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					String inputString = text.getText().toString();
+					if (inputString.length() == 4) {
+						m_postalCode = inputString;
+						new DownloadTask().execute(m_fuelChoice, m_postalCode);
+					}
+					dialog.dismiss();
+				}
+			};
 
-        break;
-      default:
-        dialog = null;
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setView(layout);
+			builder.setTitle(R.string.search_postalcode);
+			builder.setPositiveButton(R.string.error_alert_search_button,
+					search);
+			builder.setNegativeButton(R.string.error_alert_neg_button, close);
+			dialog = builder.create();
+
+			break;
+		default:
+			dialog = null;
 		}
 		return dialog;
 	}
-
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
@@ -166,33 +169,32 @@ public class PlacesListActivity extends ListActivity {
 		menu.add(0, CONTEXT_MENU_MAPS_ID, 0, "Open in Google Maps");
 		menu.add(0, CONTEXT_MENU_DETAILS_ID, 1, "Bekijk details");
 	}
-	
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-	    // Handle item selection
-	    switch (item.getItemId()) {
-	    case R.id.sort_distance:
-	        Collections.sort(m_places, distanceComparator);
-	        m_adapter.notifyDataSetChanged();
-	        return true;
-	    case R.id.sort_price:
-	        Collections.sort(m_places, priceDistanceComparator);
-	        m_adapter.notifyDataSetChanged();
-	        return true;
-	    case R.id.search_postalcode:
-	    	showDialog(DIALOG_SEARCH);
-	        return true;
-	    default:
-	        return super.onOptionsItemSelected(item);
-	    }
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.sort_distance:
+			Collections.sort(m_places, distanceComparator);
+			m_adapter.notifyDataSetChanged();
+			return true;
+		case R.id.sort_price:
+			Collections.sort(m_places, priceDistanceComparator);
+			m_adapter.notifyDataSetChanged();
+			return true;
+		case R.id.search_postalcode:
+			showDialog(DIALOG_SEARCH);
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-	    MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.layout.menu, menu);
-	    return true;
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.layout.menu, menu);
+		return true;
 	}
 
 	@Override
@@ -256,7 +258,7 @@ public class PlacesListActivity extends ListActivity {
 		List<Place> places = null;
 		if (m_places != null && m_places.size() > 0) {
 			places = m_places;
-			Collections.sort(places, distanceComparator);			
+			Collections.sort(places, distanceComparator);
 		} else {
 			places = Collections.emptyList();
 		}
@@ -396,7 +398,9 @@ public class PlacesListActivity extends ListActivity {
 				m_progressDialog.setProgress(MAX_PROGRESS);
 				m_progressDialog.dismiss();
 
-				showExceptionAlert("Postcode onbekend, kan tankstations niet downloaden",null);
+				showExceptionAlert(
+						"Postcode onbekend, kan tankstations niet downloaden",
+						null);
 			} else {
 				new DownloadTask().execute(m_fuelChoice, m_postalCode);
 			}
@@ -410,7 +414,7 @@ public class PlacesListActivity extends ListActivity {
 		protected void onPreExecute() {
 			m_exception = null;
 			Log.d(TAG, "<< m_progressDialog: " + m_progressDialog);
-			
+
 			showDialog(DIALOG_PROGRESS);
 			m_progressDialog.setTitle(R.string.progressdialog_title_download);
 		}
@@ -444,12 +448,12 @@ public class PlacesListActivity extends ListActivity {
 		@Override
 		protected void onPostExecute(List<Place> result) {
 			m_progressDialog.setProgress(MAX_PROGRESS);
-			m_progressDialog.dismiss();			
+			m_progressDialog.dismiss();
 
 			if (m_exception != null) {
 				showExceptionAlert(m_exception.getMessage(), m_exception);
 			} else if (result == null || result.size() == 0) {
-				//showExceptionAlert("Geen resultaten gevonden", m_exception);
+				// showExceptionAlert("Geen resultaten gevonden", m_exception);
 				m_places.clear();
 				m_adapter.notifyDataSetChanged();
 				Log.d(TAG, "<< Is Adapter empty: " + m_adapter.isEmpty());
@@ -457,7 +461,7 @@ public class PlacesListActivity extends ListActivity {
 			} else {
 				Log.d(TAG, "<< DownloadTask: result size = " + result.size()
 						+ ">>");
-				
+
 				m_places.clear();
 				m_places.addAll(result);
 				m_adapter.notifyDataSetChanged();

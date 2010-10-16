@@ -101,7 +101,7 @@ public class ZukaService implements DownloadService {
 				if (!getJSONString(context, JSON_CONTEXT_RESULT).equals(
 						"Success")) {
 					throw new GoedkoopTankenException(
-							"Geen resultaten gevonden voor zoekopdracht", null);
+							"Onbekende fout opgetreden bij downloaden tankstations", null);
 				}
 			}
 
@@ -127,7 +127,7 @@ public class ZukaService implements DownloadService {
 		} catch (JSONException e) {
 			e.printStackTrace();
 			throw new GoedkoopTankenException(
-					"Geen resultaten gevonden voor zoekopdracht", e);
+					"Verwerkingsfout opgetreden bij downloaden van tankstations", e);
 		}
 		return result;
 	}
