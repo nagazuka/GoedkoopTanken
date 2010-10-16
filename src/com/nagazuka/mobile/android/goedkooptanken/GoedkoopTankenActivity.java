@@ -12,12 +12,17 @@ import com.nagazuka.mobile.android.goedkooptanken.R;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesConstants;
 
 public class GoedkoopTankenActivity extends Activity {
+
+	private GoedkoopTankenApp app;
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.main);
+		
+		app = (GoedkoopTankenApp) getApplication();
 		
 	    Spinner spinner = (Spinner) findViewById(R.id.spinner);
 	    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
@@ -33,8 +38,9 @@ public class GoedkoopTankenActivity extends Activity {
 				Intent switchIntent = new Intent(v.getContext(),
 						PlacesTabActivity.class);
 				Spinner spinner = (Spinner) findViewById(R.id.spinner);
-				String gasType = (String) spinner.getSelectedItem();
-				switchIntent.putExtra(PlacesConstants.INTENT_EXTRA_FUEL_CHOICE, gasType);
+				String fuelChoice = (String) spinner.getSelectedItem();
+				app.setFuelChoice(fuelChoice);
+				app.setPlaces(null);
 				startActivityForResult(switchIntent, 0);
 			}
 		});

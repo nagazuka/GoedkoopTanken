@@ -1,6 +1,5 @@
 package com.nagazuka.mobile.android.goedkooptanken;
 
-import java.util.Collections;
 import java.util.List;
 
 import android.app.Application;
@@ -15,7 +14,8 @@ public class GoedkoopTankenApp extends Application {
 
 	private Location location = null;
 	private String postalCode = "";
-	private List<Place> places = Collections.emptyList();
+	private String fuelChoice = "";
+	private List<Place> places = null;
 
 	public GoedkoopTankenApp() {
 		setInstance(this);
@@ -43,6 +43,14 @@ public class GoedkoopTankenApp extends Application {
 
 	public List<Place> getPlaces() {
 		return places;
+	}
+	
+	public void setFuelChoice(String fuelChoice) {
+		this.fuelChoice = fuelChoice;
+	}
+
+	public String getFuelChoice() {
+		return fuelChoice;
 	}
 
 	public static Context getContext() {

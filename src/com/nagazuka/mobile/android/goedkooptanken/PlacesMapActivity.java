@@ -23,6 +23,8 @@ import com.nagazuka.mobile.android.goedkooptanken.service.impl.GoogleGeocodingSe
 public class PlacesMapActivity extends MapActivity {
 
 	private static final String TAG = PlacesMapActivity.class.getName();
+	
+	private GoedkoopTankenApp app;
 	private MapView mapView;
 
 	private GeocodingService m_geocodingService = new GoogleGeocodingService();;
@@ -43,7 +45,7 @@ public class PlacesMapActivity extends MapActivity {
 		mapView.setBuiltInZoomControls(true);
 
 		MapController mc = mapView.getController();
-		GoedkoopTankenApp app = (GoedkoopTankenApp) getApplication();
+		app = (GoedkoopTankenApp) getApplication();
 		// Get current location
 		Location currentLocation = app.getLocation();
 		List<Place> places = app.getPlaces();

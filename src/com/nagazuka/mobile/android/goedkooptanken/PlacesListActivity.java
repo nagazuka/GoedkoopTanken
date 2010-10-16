@@ -49,14 +49,15 @@ import com.nagazuka.mobile.android.goedkooptanken.service.impl.ZukaService;
 public class PlacesListActivity extends ListActivity {
 
 	private static final String TAG = PlacesListActivity.class.getName();
-
+	
+	private GoedkoopTankenApp app;
 	private PlacesAdapter m_adapter;
 	private PlaceDistanceComparator distanceComparator = new PlaceDistanceComparator();
 	private PlacePriceDistanceComparator priceDistanceComparator = new PlacePriceDistanceComparator();
 
 	private ProgressDialog m_progressDialog;
 
-	private List<Place> m_places = Collections.emptyList();
+	private List<Place> m_places = null;
 	private String m_postalCode = "";
 	private String m_fuelChoice = "";
 
@@ -66,23 +67,21 @@ public class PlacesListActivity extends ListActivity {
 	private static final int MAX_PROGRESS = 100;
 	private static final int CONTEXT_MENU_MAPS_ID = 0;
 	private static final int CONTEXT_MENU_DETAILS_ID = 1;
+	private static final int CONTEXT_MENU_NAVIGATION_ID = 2;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.list);
-		// Check whether places have been downloaded before
-		// to avoid expensive loading on screen orientation change
-		final Object data = getLastNonConfigurationInstance();
-		final List<Place> downloadedPlaces = (List<Place>) data;
-
-		if (downloadedPlaces != null && downloadedPlaces.size() > 0) {
-			m_places = downloadedPlaces;
+		
+		app = (GoedkoopTankenApp) getApplication();
+		m_fuelChoice = app.getFuelChoice();
+		m_places = app.getPlaces();
+		
+		if (m_places != null) {
 			m_adapter = new PlacesAdapter(this, R.layout.row, m_places);
 			setListAdapter(m_adapter);
-		} else {
-			m_fuelChoice = getIntent().getStringExtra(
-					PlacesConstants.INTENT_EXTRA_FUEL_CHOICE);
+		} else {			
 			ListView listView = getListView();
 			listView.setTextFilterEnabled(true);
 
@@ -167,7 +166,8 @@ public class PlacesListActivity extends ListActivity {
 			ContextMenu.ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		menu.add(0, CONTEXT_MENU_MAPS_ID, 0, "Open in Google Maps");
-		menu.add(0, CONTEXT_MENU_DETAILS_ID, 1, "Bekijk details");
+		//menu.add(0, CONTEXT_MENU_NAVIGATION_ID, 1, "Open in Google Navigatie");
+		menu.add(0, CONTEXT_MENU_DETAILS_ID, 2, "Bekijk details");
 	}
 
 	@Override
@@ -203,7 +203,10 @@ public class PlacesListActivity extends ListActivity {
 				.getMenuInfo();
 		switch (item.getItemId()) {
 		case CONTEXT_MENU_MAPS_ID:
-			openItemInGoogleMaps(info.position);
+			openItemInGoogleMaps(info.position, false);
+			return true;
+		case CONTEXT_MENU_NAVIGATION_ID:
+			openItemInGoogleMaps(info.position, true);
 			return true;
 		case CONTEXT_MENU_DETAILS_ID:
 			showDetailsDialog(info.position);
@@ -213,18 +216,16 @@ public class PlacesListActivity extends ListActivity {
 		}
 	}
 
-	private void openItemInGoogleMaps(int position) {
-		Log.d(TAG, "<< Position selected [" + position + "]");
+	private void openItemInGoogleMaps(int position, boolean navigation) {	
 		if (m_places != null) {
 			Place selectedItem = m_places.get(position);
-			Uri geoUri = createGeoURI(selectedItem);
+			Uri geoUri = createGeoURI(selectedItem, navigation);
 			Intent mapCall = new Intent(Intent.ACTION_VIEW, geoUri);
 			startActivity(mapCall);
 		}
 	}
-
+	
 	private void showDetailsDialog(int position) {
-		Log.d(TAG, "<< Position selected [" + position + "]");
 		if (m_places != null) {
 			Place selectedItem = m_places.get(position);
 			String summary = selectedItem.getSummary();
@@ -238,12 +239,18 @@ public class PlacesListActivity extends ListActivity {
 			new AlertDialog.Builder(PlacesListActivity.this)
 					.setTitle("Details").setMessage(summary).setPositiveButton(
 							"OK", back).show();
-
 		}
 	}
 
-	private Uri createGeoURI(Place selectedItem) {
-		String geoUriString = "geo:0,0?q=Nederland, ";
+	private Uri createGeoURI(Place selectedItem, boolean navigation) {
+		String geoUriString;
+		if (!navigation) {
+			geoUriString = "geo:0,0?q=Nederland, ";
+		}
+		else {
+			geoUriString = "google.navigation:?q=Nederland, ";	
+		}
+		
 		geoUriString += selectedItem.getAddress() + ", "
 				+ selectedItem.getPostalCode() + "," + selectedItem.getTown();
 		Log.d(TAG, "<< Geo Uri String [" + geoUriString + "]");
@@ -256,11 +263,10 @@ public class PlacesListActivity extends ListActivity {
 		// Save downloaded places for future self
 		// (e.g. on screen orientation change)
 		List<Place> places = null;
-		if (m_places != null && m_places.size() > 0) {
-			places = m_places;
-			Collections.sort(places, distanceComparator);
+		if (m_places != null) {
+			Collections.sort(m_places, distanceComparator);
 		} else {
-			places = Collections.emptyList();
+			m_places = Collections.emptyList();
 		}
 		return places;
 	}
@@ -357,7 +363,7 @@ public class PlacesListActivity extends ListActivity {
 				double latitude = location.getLatitude();
 				double longitude = location.getLongitude();
 
-				((GoedkoopTankenApp) getApplication()).setLocation(location);
+				app.setLocation(location);
 
 				Log.d(TAG, "<< Latitude: " + latitude + " Longitude: "
 						+ longitude + ">>");
@@ -457,7 +463,7 @@ public class PlacesListActivity extends ListActivity {
 				m_places.clear();
 				m_adapter.notifyDataSetChanged();
 				Log.d(TAG, "<< Is Adapter empty: " + m_adapter.isEmpty());
-				((GoedkoopTankenApp) getApplication()).setPlaces(m_places);
+				app.setPlaces(m_places);
 			} else {
 				Log.d(TAG, "<< DownloadTask: result size = " + result.size()
 						+ ">>");
@@ -466,7 +472,7 @@ public class PlacesListActivity extends ListActivity {
 				m_places.addAll(result);
 				m_adapter.notifyDataSetChanged();
 
-				((GoedkoopTankenApp) getApplication()).setPlaces(m_places);
+				app.setPlaces(m_places);
 			}
 		}
 	}
