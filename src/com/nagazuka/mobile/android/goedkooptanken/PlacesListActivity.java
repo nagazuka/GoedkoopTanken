@@ -298,7 +298,7 @@ public class PlacesListActivity extends ListActivity {
 
 		DialogInterface.OnClickListener positiveListener = new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
-				PlacesListActivity.this.finish();
+				dialog.dismiss();
 			}
 		};
 
@@ -497,7 +497,6 @@ public class PlacesListActivity extends ListActivity {
 				m_places.clear();
 				m_places.addAll(result);
 				m_adapter.notifyDataSetChanged();
-
 				app.setPlaces(m_places);
 			}
 		}
