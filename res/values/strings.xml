@@ -16,7 +16,9 @@
 	<string name="error_alert_search_button">Zoek</string>
 	<string name="error_alert_neg_button">Terug</string>	
 	<string name="error_alert_location_button">Locatie instellingen</string>
+	<string name="error_alert_settings_button">Instellingen</string>
 	<string name="error_alert_network_button">Netwerk instellingen</string>
+	<string name="error_alert_retry_button">Opnieuw proberen</string>
 	<string name="current_location_title">U bent hier</string>
 	<string name="current_location_text">Dit is uw geschatte locatie</string>	
 	<string name="sort_price">Sorteren op prijs</string>

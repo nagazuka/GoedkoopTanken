@@ -56,14 +56,12 @@ public class PlacesListActivity extends ListActivity {
 
 	private List<Place> m_places = null;
 	private String m_postalCode = "";
-	private String m_fuelChoice = "";
-	private int m_retryAttempts = 4;
+	private String m_fuelChoice = "";	
 
 	private static final int DIALOG_PROGRESS = 1;
 	private static final int DIALOG_SEARCH = 2;
 
-	private static final int MAX_PROGRESS = 100;
-	private static final int MAX_RETRY_ATTEMPTS = 3;
+	private static final int MAX_PROGRESS = 100;	
 
 	private static final int CONTEXT_MENU_MAPS_ID = 0;
 	private static final int CONTEXT_MENU_DETAILS_ID = 1;
@@ -310,7 +308,25 @@ public class PlacesListActivity extends ListActivity {
 
 	private void showRetryAlert(final String message, final int taskType,
 			final String buttonText) {
+		
 		Resources res = getResources();
+
+		final String settingsType;
+		final AsyncTask retryTask;
+		
+		switch (taskType) {
+		case LOCATION_TASK:
+			settingsType = Settings.ACTION_LOCATION_SOURCE_SETTINGS;
+			retryTask = new LocationTask();
+			break;
+		case DOWNLOAD_TASK:
+			settingsType = Settings.ACTION_WIRELESS_SETTINGS;
+			retryTask = new DownloadTask();
+			break;
+		default:
+			settingsType = Settings.ACTION_SETTINGS;
+			retryTask = new LocationTask();
+		}
 
 		DialogInterface.OnClickListener back = new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
@@ -320,19 +336,6 @@ public class PlacesListActivity extends ListActivity {
 
 		DialogInterface.OnClickListener settings = new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
-				String settingsType = null;
-				
-				switch (taskType) {
-				case LOCATION_TASK:
-					settingsType = Settings.ACTION_LOCATION_SOURCE_SETTINGS;
-					break;
-				case DOWNLOAD_TASK:
-					settingsType = Settings.ACTION_WIRELESS_SETTINGS;
-					break;
-				default:
-					settingsType = Settings.ACTION_SETTINGS;
-				}
-
 				Intent intent = new Intent(settingsType);
 				startActivity(intent);
 			}
@@ -487,15 +490,10 @@ public class PlacesListActivity extends ListActivity {
 				showExceptionAlert(m_exception.getMessage(), m_exception,
 						DOWNLOAD_TASK);
 			} else if (result == null || result.size() == 0) {
-				// showExceptionAlert("Geen resultaten gevonden", m_exception);
 				m_places.clear();
 				m_adapter.notifyDataSetChanged();
-				Log.d(TAG, "<< Is Adapter empty: " + m_adapter.isEmpty());
 				app.setPlaces(m_places);
 			} else {
-				Log.d(TAG, "<< DownloadTask: result size = " + result.size()
-						+ ">>");
-
 				m_places.clear();
 				m_places.addAll(result);
 				m_adapter.notifyDataSetChanged();
