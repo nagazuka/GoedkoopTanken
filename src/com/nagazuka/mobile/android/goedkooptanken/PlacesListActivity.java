@@ -283,11 +283,11 @@ public class PlacesListActivity extends ListActivity {
 			if (e instanceof LocationException) {
 				String buttonText = res
 						.getString(R.string.error_alert_location_button);
-				showRetryAlert(message, taskType, buttonText);
+				showRetryAlert(message, taskType, Settings.ACTION_LOCATION_SOURCE_SETTINGS, buttonText);
 			} else if (e instanceof NetworkException) {
 				String buttonText = res
 						.getString(R.string.error_alert_network_button);
-				showRetryAlert(message, taskType, buttonText);
+				showRetryAlert(message, taskType, Settings.ACTION_WIRELESS_SETTINGS, buttonText);
 			} else {
 				showDefaultExceptionAlert(message);
 			}
@@ -306,28 +306,10 @@ public class PlacesListActivity extends ListActivity {
 				positiveListener).show();
 	}
 
-	private void showRetryAlert(final String message, final int taskType,
+	private void showRetryAlert(final String message, final int taskType, final String settingsType,
 			final String buttonText) {
-		
 		Resources res = getResources();
-
-		final String settingsType;
-		final AsyncTask retryTask;
-		
-		switch (taskType) {
-		case LOCATION_TASK:
-			settingsType = Settings.ACTION_LOCATION_SOURCE_SETTINGS;
-			retryTask = new LocationTask();
-			break;
-		case DOWNLOAD_TASK:
-			settingsType = Settings.ACTION_WIRELESS_SETTINGS;
-			retryTask = new DownloadTask();
-			break;
-		default:
-			settingsType = Settings.ACTION_SETTINGS;
-			retryTask = new LocationTask();
-		}
-
+	
 		DialogInterface.OnClickListener back = new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
 				PlacesListActivity.this.finish();
