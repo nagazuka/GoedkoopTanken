@@ -61,7 +61,7 @@ public class PlacesMapActivity extends MapActivity {
 			pinDrawable = this.getResources().getDrawable(R.drawable.map_pin);
 			userDrawable  = this.getResources().getDrawable(R.drawable.ic_robot);
 
-			userOverlay = new PlacesItemizedOverlay(userDrawable, this);
+			userOverlay = new PlacesItemizedOverlay(userDrawable, this);	
 			itemizedoverlay = new PlacesItemizedOverlay(pinDrawable, this);
 
 			String currentLocationTitle = getResources().getString(R.string.current_location_title);
@@ -71,7 +71,6 @@ public class PlacesMapActivity extends MapActivity {
 			
 			userOverlay.addOverlay(overlayitem);
 			mapOverlays.add(userOverlay);
-			mapOverlays.add(itemizedoverlay);
 			
 			mc.setZoom(13);
 			mc.animateTo(point);
@@ -87,7 +86,7 @@ public class PlacesMapActivity extends MapActivity {
 	}
 
 	private class GeocodeTask extends AsyncTask<List<Place>, Place, Void> {
-
+    private boolean placedFirstMarker = false;
 		private Exception m_exception = null;
 
 		@Override
@@ -128,7 +127,12 @@ public class PlacesMapActivity extends MapActivity {
 
 			OverlayItem overlayitem = new OverlayItem(point, p.getName(), p
 					.getSummary());
-			itemizedoverlay.addOverlay(overlayitem);
+
+      if (!placedFirstMarker) {
+        mapOverlays.add(itemizedoverlay);
+      }
+
+      itemizedoverlay.addOverlay(overlayitem);
 			mapView.invalidate();
 		}
 

@@ -9,7 +9,6 @@ import android.widget.Button;
 import android.widget.Spinner;
 
 import com.nagazuka.mobile.android.goedkooptanken.R;
-import com.nagazuka.mobile.android.goedkooptanken.model.PlacesConstants;
 
 public class GoedkoopTankenActivity extends Activity {
 

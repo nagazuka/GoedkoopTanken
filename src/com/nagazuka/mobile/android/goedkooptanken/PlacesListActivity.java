@@ -25,11 +25,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import com.nagazuka.mobile.android.goedkooptanken.exception.LocationException;
@@ -37,7 +35,6 @@ import com.nagazuka.mobile.android.goedkooptanken.exception.NetworkException;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlaceDistanceComparator;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacePriceDistanceComparator;
-import com.nagazuka.mobile.android.goedkooptanken.model.PlacesConstants;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesParams;
 import com.nagazuka.mobile.android.goedkooptanken.service.DownloadService;
 import com.nagazuka.mobile.android.goedkooptanken.service.GeocodingService;
@@ -49,7 +46,7 @@ import com.nagazuka.mobile.android.goedkooptanken.service.impl.ZukaService;
 public class PlacesListActivity extends ListActivity {
 
 	private static final String TAG = PlacesListActivity.class.getName();
-	
+
 	private GoedkoopTankenApp app;
 	private PlacesAdapter m_adapter;
 	private PlaceDistanceComparator distanceComparator = new PlaceDistanceComparator();
@@ -60,28 +57,34 @@ public class PlacesListActivity extends ListActivity {
 	private List<Place> m_places = null;
 	private String m_postalCode = "";
 	private String m_fuelChoice = "";
+	private int m_retryAttempts = 4;
 
 	private static final int DIALOG_PROGRESS = 1;
 	private static final int DIALOG_SEARCH = 2;
 
 	private static final int MAX_PROGRESS = 100;
+	private static final int MAX_RETRY_ATTEMPTS = 3;
+
 	private static final int CONTEXT_MENU_MAPS_ID = 0;
 	private static final int CONTEXT_MENU_DETAILS_ID = 1;
 	private static final int CONTEXT_MENU_NAVIGATION_ID = 2;
+
+	private static final int LOCATION_TASK = 0;
+	private static final int DOWNLOAD_TASK = 1;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.list);
-		
+
 		app = (GoedkoopTankenApp) getApplication();
 		m_fuelChoice = app.getFuelChoice();
 		m_places = app.getPlaces();
-		
+
 		if (m_places != null) {
 			m_adapter = new PlacesAdapter(this, R.layout.row, m_places);
 			setListAdapter(m_adapter);
-		} else {			
+		} else {
 			ListView listView = getListView();
 			listView.setTextFilterEnabled(true);
 
@@ -166,7 +169,8 @@ public class PlacesListActivity extends ListActivity {
 			ContextMenu.ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		menu.add(0, CONTEXT_MENU_MAPS_ID, 0, "Open in Google Maps");
-		//menu.add(0, CONTEXT_MENU_NAVIGATION_ID, 1, "Open in Google Navigatie");
+		// menu.add(0, CONTEXT_MENU_NAVIGATION_ID, 1,
+		// "Open in Google Navigatie");
 		menu.add(0, CONTEXT_MENU_DETAILS_ID, 2, "Bekijk details");
 	}
 
@@ -216,7 +220,7 @@ public class PlacesListActivity extends ListActivity {
 		}
 	}
 
-	private void openItemInGoogleMaps(int position, boolean navigation) {	
+	private void openItemInGoogleMaps(int position, boolean navigation) {
 		if (m_places != null) {
 			Place selectedItem = m_places.get(position);
 			Uri geoUri = createGeoURI(selectedItem, navigation);
@@ -224,7 +228,7 @@ public class PlacesListActivity extends ListActivity {
 			startActivity(mapCall);
 		}
 	}
-	
+
 	private void showDetailsDialog(int position) {
 		if (m_places != null) {
 			Place selectedItem = m_places.get(position);
@@ -246,11 +250,10 @@ public class PlacesListActivity extends ListActivity {
 		String geoUriString;
 		if (!navigation) {
 			geoUriString = "geo:0,0?q=Nederland, ";
+		} else {
+			geoUriString = "google.navigation:?q=Nederland, ";
 		}
-		else {
-			geoUriString = "google.navigation:?q=Nederland, ";	
-		}
-		
+
 		geoUriString += selectedItem.getAddress() + ", "
 				+ selectedItem.getPostalCode() + "," + selectedItem.getTown();
 		Log.d(TAG, "<< Geo Uri String [" + geoUriString + "]");
@@ -271,7 +274,7 @@ public class PlacesListActivity extends ListActivity {
 		return places;
 	}
 
-	private void showExceptionAlert(String message, Exception e) {
+	private void showExceptionAlert(String message, Exception e, int taskType) {
 		Resources res = getResources();
 		if (e != null) {
 			Log.e(TAG, "<< Exception occurred in LocationTask."
@@ -282,13 +285,11 @@ public class PlacesListActivity extends ListActivity {
 			if (e instanceof LocationException) {
 				String buttonText = res
 						.getString(R.string.error_alert_location_button);
-				showSettingsExceptionAlert(message,
-						Settings.ACTION_LOCATION_SOURCE_SETTINGS, buttonText);
+				showRetryAlert(message, taskType, buttonText);
 			} else if (e instanceof NetworkException) {
 				String buttonText = res
 						.getString(R.string.error_alert_network_button);
-				showSettingsExceptionAlert(message,
-						Settings.ACTION_WIRELESS_SETTINGS, buttonText);
+				showRetryAlert(message, taskType, buttonText);
 			} else {
 				showDefaultExceptionAlert(message);
 			}
@@ -296,21 +297,19 @@ public class PlacesListActivity extends ListActivity {
 	}
 
 	private void showDefaultExceptionAlert(String message) {
-		Resources res = getResources();
 
-		new AlertDialog.Builder(PlacesListActivity.this).setTitle(
-				res.getString(R.string.error_alert_title)).setMessage(message)
-				.setPositiveButton(
-						res.getString(R.string.error_alert_pos_button),
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								PlacesListActivity.this.finish();
-							}
-						}).show();
+		DialogInterface.OnClickListener positiveListener = new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				PlacesListActivity.this.finish();
+			}
+		};
+
+		PlacesAlertDialogBuilder.createDefaultExceptionAlert(this, message,
+				positiveListener).show();
 	}
 
-	private void showSettingsExceptionAlert(final String message,
-			final String settingsType, final String buttonText) {
+	private void showRetryAlert(final String message, final int taskType,
+			final String buttonText) {
 		Resources res = getResources();
 
 		DialogInterface.OnClickListener back = new DialogInterface.OnClickListener() {
@@ -319,10 +318,38 @@ public class PlacesListActivity extends ListActivity {
 			}
 		};
 
-		DialogInterface.OnClickListener locationSettings = new DialogInterface.OnClickListener() {
+		DialogInterface.OnClickListener settings = new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
+				String settingsType = null;
+				
+				switch (taskType) {
+				case LOCATION_TASK:
+					settingsType = Settings.ACTION_LOCATION_SOURCE_SETTINGS;
+					break;
+				case DOWNLOAD_TASK:
+					settingsType = Settings.ACTION_WIRELESS_SETTINGS;
+					break;
+				default:
+					settingsType = Settings.ACTION_SETTINGS;
+				}
+
 				Intent intent = new Intent(settingsType);
 				startActivity(intent);
+			}
+		};
+
+		DialogInterface.OnClickListener retry = new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				switch (taskType) {
+				case LOCATION_TASK:
+					new LocationTask().execute();
+					break;
+				case DOWNLOAD_TASK:
+					new DownloadTask().execute(m_fuelChoice, m_postalCode);
+					break;
+				default:
+					break;
+				}
 			}
 		};
 
@@ -330,7 +357,8 @@ public class PlacesListActivity extends ListActivity {
 				res.getString(R.string.error_alert_title)).setMessage(message)
 				.setNegativeButton(
 						res.getString(R.string.error_alert_neg_button), back)
-				.setPositiveButton(buttonText, locationSettings).show();
+				.setNeutralButton(buttonText, settings).setPositiveButton(
+						R.string.error_alert_retry_button, retry).show();
 	}
 
 	private class LocationTask extends AsyncTask<Void, Integer, String> {
@@ -396,17 +424,16 @@ public class PlacesListActivity extends ListActivity {
 					+ " m_postalCode " + m_postalCode + ">>");
 
 			if (m_exception != null) {
-				m_progressDialog.setProgress(MAX_PROGRESS);
 				m_progressDialog.dismiss();
 
-				showExceptionAlert(m_exception.getMessage(), m_exception);
+				showExceptionAlert(m_exception.getMessage(), m_exception,
+						LOCATION_TASK);
 			} else if (m_postalCode == null || m_postalCode.length() == 0) {
-				m_progressDialog.setProgress(MAX_PROGRESS);
 				m_progressDialog.dismiss();
 
 				showExceptionAlert(
 						"Postcode onbekend, kan tankstations niet downloaden",
-						null);
+						null, LOCATION_TASK);
 			} else {
 				new DownloadTask().execute(m_fuelChoice, m_postalCode);
 			}
@@ -457,7 +484,8 @@ public class PlacesListActivity extends ListActivity {
 			m_progressDialog.dismiss();
 
 			if (m_exception != null) {
-				showExceptionAlert(m_exception.getMessage(), m_exception);
+				showExceptionAlert(m_exception.getMessage(), m_exception,
+						DOWNLOAD_TASK);
 			} else if (result == null || result.size() == 0) {
 				// showExceptionAlert("Geen resultaten gevonden", m_exception);
 				m_places.clear();
