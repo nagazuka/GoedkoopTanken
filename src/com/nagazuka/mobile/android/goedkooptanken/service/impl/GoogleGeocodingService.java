@@ -44,6 +44,10 @@ public class GoogleGeocodingService implements GeocodingService {
 			postalCode = address.getPostalCode();
 			Log.d(TAG, "<< Geocoder found postalCode: " + postalCode + ">>");
 		}
+		else {
+			throw new NetworkException(
+					"Uw postcode kan niet bepaald worden. Onbekende fout opgetreden.", null);
+		}
 
 		return postalCode;
 	}
