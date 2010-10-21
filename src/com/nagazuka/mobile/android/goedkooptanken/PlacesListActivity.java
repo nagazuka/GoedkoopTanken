@@ -56,12 +56,11 @@ public class PlacesListActivity extends ListActivity {
 
 	private List<Place> m_places = null;
 	private String m_postalCode = "";
-	private String m_fuelChoice = "";	
 
 	private static final int DIALOG_PROGRESS = 1;
 	private static final int DIALOG_SEARCH = 2;
 
-	private static final int MAX_PROGRESS = 100;	
+	private static final int MAX_PROGRESS = 100;
 
 	private static final int CONTEXT_MENU_MAPS_ID = 0;
 	private static final int CONTEXT_MENU_DETAILS_ID = 1;
@@ -69,6 +68,7 @@ public class PlacesListActivity extends ListActivity {
 
 	private static final int LOCATION_TASK = 0;
 	private static final int DOWNLOAD_TASK = 1;
+	private static final int GEOCODE_TASK = 2;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -76,7 +76,6 @@ public class PlacesListActivity extends ListActivity {
 		setContentView(R.layout.list);
 
 		app = (GoedkoopTankenApp) getApplication();
-		m_fuelChoice = app.getFuelChoice();
 		m_places = app.getPlaces();
 
 		if (m_places != null) {
@@ -89,10 +88,8 @@ public class PlacesListActivity extends ListActivity {
 			m_places = new ArrayList<Place>();
 			m_adapter = new PlacesAdapter(this, R.layout.row, m_places);
 			setListAdapter(m_adapter);
-
 			new LocationTask().execute();
 		}
-
 		registerForContextMenu(getListView());
 	}
 
@@ -283,11 +280,13 @@ public class PlacesListActivity extends ListActivity {
 			if (e instanceof LocationException) {
 				String buttonText = res
 						.getString(R.string.error_alert_location_button);
-				showRetryAlert(message, taskType, Settings.ACTION_LOCATION_SOURCE_SETTINGS, buttonText);
+				showRetryAlert(message, taskType,
+						Settings.ACTION_LOCATION_SOURCE_SETTINGS, buttonText);
 			} else if (e instanceof NetworkException) {
 				String buttonText = res
 						.getString(R.string.error_alert_network_button);
-				showRetryAlert(message, taskType, Settings.ACTION_WIRELESS_SETTINGS, buttonText);
+				showRetryAlert(message, taskType,
+						Settings.ACTION_WIRELESS_SETTINGS, buttonText);
 			} else {
 				showDefaultExceptionAlert(message);
 			}
@@ -306,10 +305,10 @@ public class PlacesListActivity extends ListActivity {
 				positiveListener).show();
 	}
 
-	private void showRetryAlert(final String message, final int taskType, final String settingsType,
-			final String buttonText) {
+	private void showRetryAlert(final String message, final int taskType,
+			final String settingsType, final String buttonText) {
 		Resources res = getResources();
-	
+
 		DialogInterface.OnClickListener back = new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
 				PlacesListActivity.this.finish();
@@ -332,6 +331,9 @@ public class PlacesListActivity extends ListActivity {
 				case DOWNLOAD_TASK:
 					new DownloadTask().execute();
 					break;
+				case GEOCODE_TASK:
+					new GeocodeTask().execute();
+					break;
 				default:
 					break;
 				}
@@ -351,16 +353,15 @@ public class PlacesListActivity extends ListActivity {
 		private Exception m_exception = null;
 		private LocationManager m_locationManager = null;
 		private LocationService m_locationService = null;
-		private GeocodingService m_geocodingService = null;
 
 		@Override
 		public void onPreExecute() {
 			m_exception = null;
 			m_locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 			m_locationService = new AndroidLocationService();
-			m_geocodingService = new GoogleGeocodingService();
 
 			showDialog(DIALOG_PROGRESS);
+			m_progressDialog.setIcon(R.drawable.ic_gps_satellite);
 			m_progressDialog.setTitle(R.string.progressdialog_title_location);
 			m_progressDialog.setProgress(0);
 		}
@@ -383,10 +384,61 @@ public class PlacesListActivity extends ListActivity {
 
 				publishProgress((int) (MAX_PROGRESS * 0.25));
 
+			} catch (Exception e) {
+				m_exception = e;
+			}
+
+			return postalCode;
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... progress) {
+			m_progressDialog.setProgress(progress[0]);
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			m_postalCode = result;
+
+			if (m_exception != null) {
+				m_progressDialog.dismiss();
+				showExceptionAlert(m_exception.getMessage(), m_exception,
+						LOCATION_TASK);
+			} else {
+				new GeocodeTask().execute();
+			}
+		}
+	}
+
+	private class GeocodeTask extends AsyncTask<Void, Integer, String> {
+
+		private Exception m_exception = null;
+		private GeocodingService m_geocodingService = null;
+
+		@Override
+		public void onPreExecute() {
+			m_exception = null;
+			m_geocodingService = new GoogleGeocodingService();
+
+			showDialog(DIALOG_PROGRESS);
+			m_progressDialog.setIcon(R.drawable.ic_mail);
+			m_progressDialog.setTitle(R.string.progressdialog_title_geocode);
+			m_progressDialog.setProgress(0);
+		}
+
+		@Override
+		protected String doInBackground(Void... params) {
+			String postalCode = "";
+
+			try {
+				Location location = app.getLocation();
+				double latitude = location.getLatitude();
+				double longitude = location.getLongitude();
+
 				// Transform location to address using reverse geocoding
 				postalCode = m_geocodingService.getPostalCode(latitude,
 						longitude);
-
+				app.setPostalCode(postalCode);
 				publishProgress((int) (MAX_PROGRESS * 0.33));
 			} catch (Exception e) {
 				m_exception = e;
@@ -405,20 +457,15 @@ public class PlacesListActivity extends ListActivity {
 			m_progressDialog.setProgress((int) (MAX_PROGRESS * 0.5));
 			m_postalCode = result;
 
-			Log.d(TAG, "<< LocationTask: mFuelChoice " + m_fuelChoice
-					+ " m_postalCode " + m_postalCode + ">>");
-
 			if (m_exception != null) {
 				m_progressDialog.dismiss();
-
 				showExceptionAlert(m_exception.getMessage(), m_exception,
-						LOCATION_TASK);
+						GEOCODE_TASK);
 			} else if (m_postalCode == null || m_postalCode.length() == 0) {
 				m_progressDialog.dismiss();
-
 				showExceptionAlert(
 						"Postcode onbekend, kan tankstations niet downloaden",
-						null, LOCATION_TASK);
+						null, GEOCODE_TASK);
 			} else {
 				new DownloadTask().execute();
 			}
@@ -431,9 +478,8 @@ public class PlacesListActivity extends ListActivity {
 		@Override
 		protected void onPreExecute() {
 			m_exception = null;
-			Log.d(TAG, "<< m_progressDialog: " + m_progressDialog);
-
 			showDialog(DIALOG_PROGRESS);
+			m_progressDialog.setIcon(R.drawable.ic_web);
 			m_progressDialog.setTitle(R.string.progressdialog_title_download);
 		}
 
@@ -442,14 +488,11 @@ public class PlacesListActivity extends ListActivity {
 			List<Place> results = Collections.emptyList();
 
 			try {
-				PlacesParams placesParams = new PlacesParams(m_fuelChoice,
-						m_postalCode);
-
+				PlacesParams placesParams = new PlacesParams(app
+						.getFuelChoice(), app.getPostalCode());
 				publishProgress((int) (MAX_PROGRESS * 0.75));
-
 				DownloadService downloader = new ZukaService();
 				results = downloader.fetchPlaces(placesParams);
-
 				publishProgress((int) (MAX_PROGRESS * 0.90));
 			} catch (Exception e) {
 				m_exception = e;

@@ -7,6 +7,7 @@
 	<string name="map_label">Kaart</string>
 	<string name="about_label">Over</string>	
 	<string name="progressdialog_title_location">Locatie bepalen</string>
+	<string name="progressdialog_title_geocode">Postcode opvragen</string>
 	<string name="progressdialog_title_download">Tankstations downloaden</string>
 	<string name="progressdialog_cancel">Annuleren</string>
 	<string name="gastype_prompt">Kies een brandstof</string>
