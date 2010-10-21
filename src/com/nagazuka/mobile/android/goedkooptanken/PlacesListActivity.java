@@ -374,14 +374,7 @@ public class PlacesListActivity extends ListActivity {
 				Location location = m_locationService
 						.getCurrentLocation(m_locationManager);
 
-				double latitude = location.getLatitude();
-				double longitude = location.getLongitude();
-
 				app.setLocation(location);
-
-				Log.d(TAG, "<< Latitude: " + latitude + " Longitude: "
-						+ longitude + ">>");
-
 				publishProgress((int) (MAX_PROGRESS * 0.25));
 
 			} catch (Exception e) {
