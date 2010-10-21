@@ -123,7 +123,7 @@ public class PlacesListActivity extends ListActivity {
 					.getSystemService(LAYOUT_INFLATER_SERVICE);
 			View layout = inflater.inflate(R.layout.search_dialog, null);
 
-			final EditText text = (EditText) layout
+			final EditText edittext = (EditText) layout
 					.findViewById(R.id.search_postalcode_text);
 
 			ImageView image = (ImageView) layout
@@ -138,10 +138,10 @@ public class PlacesListActivity extends ListActivity {
 
 			DialogInterface.OnClickListener search = new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
-					String inputString = text.getText().toString();
+					String inputString = edittext.getText().toString();
 					if (inputString.length() == 4) {
 						m_postalCode = inputString;
-						new DownloadTask().execute(m_fuelChoice, m_postalCode);
+						new DownloadTask().execute();
 					}
 					dialog.dismiss();
 				}
@@ -330,7 +330,7 @@ public class PlacesListActivity extends ListActivity {
 					new LocationTask().execute();
 					break;
 				case DOWNLOAD_TASK:
-					new DownloadTask().execute(m_fuelChoice, m_postalCode);
+					new DownloadTask().execute();
 					break;
 				default:
 					break;
@@ -420,12 +420,12 @@ public class PlacesListActivity extends ListActivity {
 						"Postcode onbekend, kan tankstations niet downloaden",
 						null, LOCATION_TASK);
 			} else {
-				new DownloadTask().execute(m_fuelChoice, m_postalCode);
+				new DownloadTask().execute();
 			}
 		}
 	}
 
-	private class DownloadTask extends AsyncTask<String, Integer, List<Place>> {
+	private class DownloadTask extends AsyncTask<Void, Integer, List<Place>> {
 		private Exception m_exception = null;
 
 		@Override
@@ -438,12 +438,12 @@ public class PlacesListActivity extends ListActivity {
 		}
 
 		@Override
-		protected List<Place> doInBackground(String... params) {
+		protected List<Place> doInBackground(Void... params) {
 			List<Place> results = Collections.emptyList();
 
 			try {
-				PlacesParams placesParams = new PlacesParams(params[0],
-						params[1]);
+				PlacesParams placesParams = new PlacesParams(m_fuelChoice,
+						m_postalCode);
 
 				publishProgress((int) (MAX_PROGRESS * 0.75));
 
