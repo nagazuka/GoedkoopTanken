@@ -141,6 +141,7 @@ public class PlacesListActivity extends ListActivity {
 					imm.hideSoftInputFromWindow(edittext.getWindowToken(), 0);
 					if (inputString.length() == 4) {
 						m_postalCode = inputString;
+						app.setPostalCode(m_postalCode);
 						new DownloadTask().execute();
 					}
 					dialog.dismiss();
@@ -377,10 +378,7 @@ public class PlacesListActivity extends ListActivity {
 			try {
 				Location location = m_locationService
 						.getCurrentLocation(m_locationManager);
-
 				app.setLocation(location);
-				publishProgress((int) (MAX_PROGRESS * 0.33));
-
 			} catch (Exception e) {
 				m_exception = e;
 			}
@@ -395,6 +393,7 @@ public class PlacesListActivity extends ListActivity {
 
 		@Override
 		protected void onPostExecute(String result) {
+			m_progressDialog.setProgress((int) (MAX_PROGRESS * 0.33));
 			m_postalCode = result;
 
 			if (m_exception != null) {
@@ -418,6 +417,7 @@ public class PlacesListActivity extends ListActivity {
 			m_geocodingService = new GoogleGeocodingService();
 
 			showDialog(DIALOG_PROGRESS);
+			m_progressDialog.setProgress((int)(MAX_PROGRESS*0.33));			
 			m_progressDialog.setIcon(R.drawable.ic_mail);
 			m_progressDialog.setTitle(R.string.progressdialog_title_geocode);
 		}
@@ -435,7 +435,6 @@ public class PlacesListActivity extends ListActivity {
 				postalCode = m_geocodingService.getPostalCode(latitude,
 						longitude);
 				app.setPostalCode(postalCode);
-				publishProgress((int) (MAX_PROGRESS * 0.50));
 			} catch (Exception e) {
 				m_exception = e;
 			}
@@ -475,6 +474,7 @@ public class PlacesListActivity extends ListActivity {
 		protected void onPreExecute() {
 			m_exception = null;
 			showDialog(DIALOG_PROGRESS);
+			m_progressDialog.setProgress((int)(MAX_PROGRESS*0.67));
 			m_progressDialog.setIcon(R.drawable.ic_web);
 			m_progressDialog.setTitle(R.string.progressdialog_title_download);
 		}
@@ -487,8 +487,7 @@ public class PlacesListActivity extends ListActivity {
 				PlacesParams placesParams = new PlacesParams(app
 						.getFuelChoice(), app.getPostalCode());				
 				DownloadService downloader = new ZukaService();
-				results = downloader.fetchPlaces(placesParams);
-				publishProgress((int) (MAX_PROGRESS * 0.90));
+				results = downloader.fetchPlaces(placesParams);				
 			} catch (Exception e) {
 				m_exception = e;
 			}

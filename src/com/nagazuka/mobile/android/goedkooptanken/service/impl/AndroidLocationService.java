@@ -11,7 +11,7 @@ import com.nagazuka.mobile.android.goedkooptanken.service.LocationService;
 
 public class AndroidLocationService implements LocationService {
 
-	private static final String TAG = null;
+	private static final String TAG = AndroidLocationService.class.getName();
 
 	@Override
 	public Location getCurrentLocation(LocationManager locationManager) throws GoedkoopTankenException {
@@ -20,7 +20,7 @@ public class AndroidLocationService implements LocationService {
 
 		try {
 			Criteria criteria = new Criteria();
-			criteria.setAccuracy(Criteria.ACCURACY_FINE);
+			criteria.setAccuracy(Criteria.ACCURACY_COARSE);
 			String provider = locationManager.getBestProvider(criteria, true);
 			Log.d(TAG, "<< bestProvider: " + provider + ">>");
 
