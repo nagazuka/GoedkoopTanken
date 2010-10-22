@@ -3,7 +3,7 @@
 	<string name="app_name">GoedkoopTanken</string>
 	<string name="gpsButton_text">Zoeken in de buurt</string>
 	<string name="postcodeButton_text">Zoeken op postcode</string>
-	<string name="results_label">Zoekresultaten</string>
+	<string name="results_label">Lijst</string>
 	<string name="map_label">Kaart</string>
 	<string name="about_label">Over</string>	
 	<string name="progressdialog_title_location">Locatie bepalen</string>
