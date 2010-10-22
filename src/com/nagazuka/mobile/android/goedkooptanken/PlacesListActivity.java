@@ -25,6 +25,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -136,6 +137,8 @@ public class PlacesListActivity extends ListActivity {
 			DialogInterface.OnClickListener search = new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					String inputString = edittext.getText().toString();
+					InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+					imm.hideSoftInputFromWindow(edittext.getWindowToken(), 0);
 					if (inputString.length() == 4) {
 						m_postalCode = inputString;
 						new DownloadTask().execute();
@@ -227,6 +230,7 @@ public class PlacesListActivity extends ListActivity {
 	private void showDetailsDialog(int position) {
 		if (m_places != null) {
 			Place selectedItem = m_places.get(position);
+			String title = selectedItem.getName();
 			String summary = selectedItem.getSummary();
 
 			DialogInterface.OnClickListener back = new DialogInterface.OnClickListener() {
@@ -236,7 +240,7 @@ public class PlacesListActivity extends ListActivity {
 			};
 
 			new AlertDialog.Builder(PlacesListActivity.this)
-					.setTitle("Details").setMessage(summary).setPositiveButton(
+					.setTitle(title).setMessage(summary).setPositiveButton(
 							"OK", back).show();
 		}
 	}
@@ -375,7 +379,7 @@ public class PlacesListActivity extends ListActivity {
 						.getCurrentLocation(m_locationManager);
 
 				app.setLocation(location);
-				publishProgress((int) (MAX_PROGRESS * 0.25));
+				publishProgress((int) (MAX_PROGRESS * 0.33));
 
 			} catch (Exception e) {
 				m_exception = e;
@@ -416,7 +420,6 @@ public class PlacesListActivity extends ListActivity {
 			showDialog(DIALOG_PROGRESS);
 			m_progressDialog.setIcon(R.drawable.ic_mail);
 			m_progressDialog.setTitle(R.string.progressdialog_title_geocode);
-			m_progressDialog.setProgress(0);
 		}
 
 		@Override
@@ -432,7 +435,7 @@ public class PlacesListActivity extends ListActivity {
 				postalCode = m_geocodingService.getPostalCode(latitude,
 						longitude);
 				app.setPostalCode(postalCode);
-				publishProgress((int) (MAX_PROGRESS * 0.33));
+				publishProgress((int) (MAX_PROGRESS * 0.50));
 			} catch (Exception e) {
 				m_exception = e;
 			}
@@ -447,7 +450,7 @@ public class PlacesListActivity extends ListActivity {
 
 		@Override
 		protected void onPostExecute(String result) {
-			m_progressDialog.setProgress((int) (MAX_PROGRESS * 0.5));
+			m_progressDialog.setProgress((int) (MAX_PROGRESS * 0.67));
 			m_postalCode = result;
 
 			if (m_exception != null) {
@@ -482,8 +485,7 @@ public class PlacesListActivity extends ListActivity {
 
 			try {
 				PlacesParams placesParams = new PlacesParams(app
-						.getFuelChoice(), app.getPostalCode());
-				publishProgress((int) (MAX_PROGRESS * 0.75));
+						.getFuelChoice(), app.getPostalCode());				
 				DownloadService downloader = new ZukaService();
 				results = downloader.fetchPlaces(placesParams);
 				publishProgress((int) (MAX_PROGRESS * 0.90));
@@ -514,7 +516,7 @@ public class PlacesListActivity extends ListActivity {
 			} else {
 				m_places.clear();
 				m_places.addAll(result);
-				m_adapter.notifyDataSetChanged();
+				m_adapter.notifyDataSetChanged();				
 				app.setPlaces(m_places);
 			}
 		}
