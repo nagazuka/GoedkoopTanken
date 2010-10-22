@@ -12,18 +12,13 @@ import android.widget.TabHost;
 
 public class PlacesTabActivity extends TabActivity {
 
-	private static final String TAG = "PlacesActivity";
-	private String mFuelChoice = "";
+	private static final String TAG = "PlacesTabActivity";
 	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		setContentView(R.layout.places);
-
-		mFuelChoice = getIntent().getStringExtra(
-				PlacesConstants.INTENT_EXTRA_FUEL_CHOICE);
 
 		// Tab initialization
 		Resources res = getResources(); // Resource object to get Drawables
@@ -33,10 +28,6 @@ public class PlacesTabActivity extends TabActivity {
 
 		// Create an Intent to launch an Activity for the tab (to be reused)
 		intent = new Intent().setClass(this, PlacesListActivity.class);
-
-		Log.d(TAG, "<< mFuelChoice " + mFuelChoice + ">>");
-
-		intent.putExtra(PlacesConstants.INTENT_EXTRA_FUEL_CHOICE, mFuelChoice);
 
 		// Initialize a TabSpec for each tab and add it to the TabHost
 		spec = tabHost.newTabSpec("list").setIndicator(
