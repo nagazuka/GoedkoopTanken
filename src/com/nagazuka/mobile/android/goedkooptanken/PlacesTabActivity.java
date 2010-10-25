@@ -1,13 +1,9 @@
 package com.nagazuka.mobile.android.goedkooptanken;
 
-import com.nagazuka.mobile.android.goedkooptanken.R;
-import com.nagazuka.mobile.android.goedkooptanken.model.PlacesConstants;
-
 import android.app.TabActivity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TabHost;
 
 public class PlacesTabActivity extends TabActivity {

@@ -1,5 +1,6 @@
 package com.nagazuka.mobile.android.goedkooptanken;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,19 +19,21 @@ import com.google.android.maps.OverlayItem;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlaceDistanceComparator;
 import com.nagazuka.mobile.android.goedkooptanken.service.GeocodingService;
+import com.nagazuka.mobile.android.goedkooptanken.service.UploadService;
 import com.nagazuka.mobile.android.goedkooptanken.service.impl.GoogleGeocodingService;
+import com.nagazuka.mobile.android.goedkooptanken.service.impl.ZukaService;
 
 public class PlacesMapActivity extends MapActivity {
 
 	private static final String TAG = PlacesMapActivity.class.getName();
-	
+
 	private GoedkoopTankenApp app;
 	private MapView mapView;
 
 	private GeocodingService m_geocodingService = new GoogleGeocodingService();;
 	private List<Overlay> mapOverlays = null;
 	private Drawable pinDrawable = null;
-	private Drawable userDrawable = null;	
+	private Drawable userDrawable = null;
 	private PlacesItemizedOverlay itemizedoverlay = null;
 	private PlacesItemizedOverlay userOverlay = null;
 
@@ -48,7 +51,6 @@ public class PlacesMapActivity extends MapActivity {
 		app = (GoedkoopTankenApp) getApplication();
 		// Get current location
 		Location currentLocation = app.getLocation();
-		List<Place> places = app.getPlaces();
 
 		if (currentLocation != null) {
 			double latitude = currentLocation.getLatitude();
@@ -59,24 +61,26 @@ public class PlacesMapActivity extends MapActivity {
 
 			mapOverlays = mapView.getOverlays();
 			pinDrawable = this.getResources().getDrawable(R.drawable.map_pin);
-			userDrawable  = this.getResources().getDrawable(R.drawable.ic_robot);
+			userDrawable = this.getResources().getDrawable(R.drawable.ic_robot);
 
-			userOverlay = new PlacesItemizedOverlay(userDrawable, this);	
+			userOverlay = new PlacesItemizedOverlay(userDrawable, this);
 			itemizedoverlay = new PlacesItemizedOverlay(pinDrawable, this);
 
-			String currentLocationTitle = getResources().getString(R.string.current_location_title);
-			String currentLocationText = getResources().getString(R.string.current_location_text);
-			OverlayItem overlayitem = new OverlayItem(point, currentLocationTitle,
-					currentLocationText);
-			
+			String currentLocationTitle = getResources().getString(
+					R.string.current_location_title);
+			String currentLocationText = getResources().getString(
+					R.string.current_location_text);
+			OverlayItem overlayitem = new OverlayItem(point,
+					currentLocationTitle, currentLocationText);
+
 			userOverlay.addOverlay(overlayitem);
 			mapOverlays.add(userOverlay);
-			
+
 			mc.setZoom(13);
 			mc.animateTo(point);
-			
+
 			// Geocode all places and place markers on map
-			new GeocodeTask().execute(places);
+			new GeocodeTask().execute();
 		}
 	}
 
@@ -85,19 +89,17 @@ public class PlacesMapActivity extends MapActivity {
 		return false;
 	}
 
-	private class GeocodeTask extends AsyncTask<List<Place>, Place, Void> {
-    private boolean placedFirstMarker = false;
-		private Exception m_exception = null;
+	private class GeocodeTask extends AsyncTask<Void, Place, Void> {
+		private boolean placedFirstMarker = false;
 
 		@Override
 		public void onPreExecute() {
-			m_exception = null;
 		}
 
 		@Override
-		protected Void doInBackground(List<Place>... params) {
+		protected Void doInBackground(Void...params) {
 			try {
-				List<Place> places = params[0];
+				List<Place> places = app.getPlaces();
 				Collections.sort(places, new PlaceDistanceComparator());
 				for (Place p : places) {
 					if (p.getPoint() == null) {
@@ -113,9 +115,9 @@ public class PlacesMapActivity extends MapActivity {
 					publishProgress(p);
 				}
 			} catch (Exception e) {
-				Log.e(TAG, "Unexpected exception in GeocodeTask" + e.getMessage());
+				Log.e(TAG, "Unexpected exception in GeocodeTask"
+						+ e.getMessage());
 				e.printStackTrace();
-				m_exception = e;
 			}
 			return null;
 		}
@@ -128,17 +130,55 @@ public class PlacesMapActivity extends MapActivity {
 			OverlayItem overlayitem = new OverlayItem(point, p.getName(), p
 					.getSummary());
 
-      if (!placedFirstMarker) {
-        mapOverlays.add(itemizedoverlay);
-      }
+			if (!placedFirstMarker) {
+				mapOverlays.add(itemizedoverlay);
+			}
 
-      itemizedoverlay.addOverlay(overlayitem);
+			itemizedoverlay.addOverlay(overlayitem);
 			mapView.invalidate();
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
 			mapView.invalidate();
+			new UploadTask().execute();
+		}
+	}
+
+	private class UploadTask extends AsyncTask<Void, Place, Void> {
+
+		private UploadService m_uploadService = null;
+
+		@Override
+		public void onPreExecute() {
+			m_uploadService = new ZukaService();
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			try {
+				List<Place> places = app.getPlaces();
+				List<Place> uploadPlaces = new ArrayList<Place>();
+				for (Place p : places) {
+					if (p.getPoint() != null) {
+						uploadPlaces.add(p);
+					}
+				}
+				m_uploadService.uploadPlaces(uploadPlaces);
+			} catch (Exception e) {
+				Log.e(TAG, "Unexpected exception in UploadTask"
+						+ e.getMessage());
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onProgressUpdate(Place... progress) {
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
 		}
 	}
 }

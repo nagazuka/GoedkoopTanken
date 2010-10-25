@@ -23,8 +23,9 @@ import com.nagazuka.mobile.android.goedkooptanken.exception.NetworkException;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.model.PlacesParams;
 import com.nagazuka.mobile.android.goedkooptanken.service.DownloadService;
+import com.nagazuka.mobile.android.goedkooptanken.service.UploadService;
 
-public class ZukaService implements DownloadService {
+public class ZukaService implements DownloadService, UploadService {
 
 	private static final String TAG = "PlacesDownloader";
 
@@ -150,5 +151,11 @@ public class ZukaService implements DownloadService {
 			result = json.getDouble(key);
 		}
 		return result;
+	}
+
+	@Override
+	public void uploadPlaces(List<Place> places) throws GoedkoopTankenException {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -20,7 +20,6 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.ContextMenu;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -115,11 +114,8 @@ public class PlacesListActivity extends ListActivity {
 					});
 			dialog = m_progressDialog;
 			break;
-		case DIALOG_SEARCH:
-			Context mContext = getApplicationContext();
-			LayoutInflater inflater = (LayoutInflater) mContext
-					.getSystemService(LAYOUT_INFLATER_SERVICE);
-			View layout = inflater.inflate(R.layout.search_dialog, null);
+		case DIALOG_SEARCH:			
+			View layout = getLayoutInflater().inflate(R.layout.search_dialog, null);
 
 			final EditText edittext = (EditText) layout
 					.findViewById(R.id.search_postalcode_text);
@@ -261,23 +257,10 @@ public class PlacesListActivity extends ListActivity {
 		return geoUri;
 	}
 
-	@Override
-	public Object onRetainNonConfigurationInstance() {
-		// Save downloaded places for future self
-		// (e.g. on screen orientation change)
-		List<Place> places = null;
-		if (m_places != null) {
-			Collections.sort(m_places, distanceComparator);
-		} else {
-			m_places = Collections.emptyList();
-		}
-		return places;
-	}
-
 	private void showExceptionAlert(String message, Exception e, int taskType) {
 		Resources res = getResources();
 		if (e != null) {
-			Log.e(TAG, "<< Exception occurred in LocationTask."
+			Log.e(TAG, "<< Exception occurred: "
 					+ e.getMessage());
 		}
 
