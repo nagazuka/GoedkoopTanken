@@ -152,10 +152,29 @@ public class ZukaService implements DownloadService, UploadService {
 		}
 		return result;
 	}
+	
+	public String upload(PlacesParams params) throws NetworkException {
+		String response = "";
+		try {
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpGet request = new HttpGet(constructURL(params));
+			Log.d(TAG, "<< HTTP Request: " + request.toString());
+
+			ResponseHandler<String> handler = new BasicResponseHandler();
+			response = httpClient.execute(request, handler);
+			Log.d(TAG, "<< HTTP Response: " + response);
+
+			httpClient.getConnectionManager().shutdown();
+		} catch (ClientProtocolException c) {
+			c.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return response;
+	}
 
 	@Override
 	public void uploadPlaces(List<Place> places) throws GoedkoopTankenException {
-		// TODO Auto-generated method stub
-		
 	}
 }
