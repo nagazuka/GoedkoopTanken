@@ -82,6 +82,7 @@ public class PlacesMapActivity extends MapActivity {
 			// Geocode all places and place markers on map
 			new GeocodeTask().execute();
 		}
+		GoedkoopTankenApp.getTracker().trackPageView("/PlacesMapActivity/1.5");
 	}
 
 	@Override
@@ -141,7 +142,7 @@ public class PlacesMapActivity extends MapActivity {
 		@Override
 		protected void onPostExecute(Void result) {
 			mapView.invalidate();
-			new UploadTask().execute();
+			//new UploadTask().execute();
 		}
 	}
 
@@ -158,13 +159,13 @@ public class PlacesMapActivity extends MapActivity {
 		protected Void doInBackground(Void... params) {
 			try {
 				List<Place> places = app.getPlaces();
-				List<Place> uploadPlaces = new ArrayList<Place>();
+				List<Place> uploadPlacesList = new ArrayList<Place>();
 				for (Place p : places) {
 					if (p.getPoint() != null) {
-						uploadPlaces.add(p);
+						uploadPlacesList.add(p);
 					}
 				}
-				m_uploadService.uploadPlaces(uploadPlaces);
+				m_uploadService.uploadPlaces(uploadPlacesList);
 			} catch (Exception e) {
 				Log.e(TAG, "Unexpected exception in UploadTask"
 						+ e.getMessage());

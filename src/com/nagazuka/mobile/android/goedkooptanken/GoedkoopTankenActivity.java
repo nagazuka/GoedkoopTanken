@@ -1,6 +1,7 @@
 package com.nagazuka.mobile.android.goedkooptanken;
 
 import android.app.Activity;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -64,5 +65,9 @@ public class GoedkoopTankenActivity extends Activity {
 				startActivityForResult(switchIntent, 0);
 			}
 		});
+		
+	    // Start the tracker in manual dispatch mode...
+	    GoedkoopTankenApp.getTracker().start("UA-642674-2", this);
+	    GoedkoopTankenApp.getTracker().trackPageView("/GoedkoopTankenActivity/1.5");
 	}
 }

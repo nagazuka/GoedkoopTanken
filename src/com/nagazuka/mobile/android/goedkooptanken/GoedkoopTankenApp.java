@@ -6,11 +6,13 @@ import android.app.Application;
 import android.content.Context;
 import android.location.Location;
 
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 
 public class GoedkoopTankenApp extends Application {
 
 	private static GoedkoopTankenApp instance;
+	private static GoogleAnalyticsTracker tracker = null;
 
 	private Location location = null;
 	private String postalCode = "";
@@ -55,6 +57,13 @@ public class GoedkoopTankenApp extends Application {
 
 	public static Context getContext() {
 		return instance.getApplicationContext();
+	}
+	
+	public static GoogleAnalyticsTracker getTracker() {
+		if (tracker == null) {
+		    tracker = GoogleAnalyticsTracker.getInstance();
+		}
+		return tracker;
 	}
 
 	private static void setInstance(GoedkoopTankenApp app) {

@@ -4,7 +4,8 @@
 	android:versionCode="5" android:versionName="1.4"
 	android:installLocation="auto">
 	<application android:icon="@drawable/ic_application"
-		android:label="@string/app_name" android:name="GoedkoopTankenApp">
+		android:label="@string/app_name" android:name="GoedkoopTankenApp"
+		android:theme="@android:style/Theme.NoTitleBar">
 		<activity android:name=".GoedkoopTankenActivity"
 			android:label="@string/app_name" android:screenOrientation="portrait">
 			<intent-filter>
@@ -12,12 +13,13 @@
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
-		<activity android:name=".PlacesTabActivity" android:label="@string/results_label" />
+		<activity android:name=".PlacesTabActivity" android:label="@string/tab_label" />
 		<activity android:name=".PlacesListActivity" />
 		<activity android:name=".PlacesMapActivity" android:label="@string/app_name" />
 		<uses-library android:name="com.google.android.maps" />
 	</application>
 	<uses-sdk android:minSdkVersion="4" android:targetSdkVersion="8" />
 	<uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 </manifest> 
