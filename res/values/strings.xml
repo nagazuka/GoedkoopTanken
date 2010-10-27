@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="app_name">GoedkoopTanken</string>
+	<string name="app_name">GoedkoopTanken</string>	
 	<string name="gpsButton_text">Zoeken in de buurt</string>
 	<string name="postcodeButton_text">Zoeken op postcode</string>
 	<string name="tab_label">Lijst</string>
