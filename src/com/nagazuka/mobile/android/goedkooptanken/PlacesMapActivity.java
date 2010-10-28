@@ -98,10 +98,10 @@ public class PlacesMapActivity extends MapActivity {
 		}
 
 		@Override
-		protected Void doInBackground(Void...params) {
+		protected Void doInBackground(Void... params) {
 			try {
 				List<Place> places = app.getPlaces();
-				Collections.sort(places, new PlaceDistanceComparator());
+
 				for (Place p : places) {
 					if (p.getPoint() == null) {
 						double[] latlong = m_geocodingService.getLocation(p);
@@ -142,7 +142,7 @@ public class PlacesMapActivity extends MapActivity {
 		@Override
 		protected void onPostExecute(Void result) {
 			mapView.invalidate();
-			//new UploadTask().execute();
+			// new UploadTask().execute();
 		}
 	}
 

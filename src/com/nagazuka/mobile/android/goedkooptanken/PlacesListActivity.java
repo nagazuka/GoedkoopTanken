@@ -30,6 +30,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
+import com.nagazuka.mobile.android.goedkooptanken.exception.GoedkoopTankenException;
 import com.nagazuka.mobile.android.goedkooptanken.exception.LocationException;
 import com.nagazuka.mobile.android.goedkooptanken.exception.NetworkException;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
@@ -262,8 +263,7 @@ public class PlacesListActivity extends ListActivity {
 	private void showExceptionAlert(String message, Exception e, int taskType) {
 		Resources res = getResources();
 		if (e != null) {
-			Log.e(TAG, "<< Exception occurred: "
-					+ e.getMessage());
+			Log.e(TAG, "<< Exception occurred: " + e + e.getMessage());
 		}
 
 		if (!PlacesListActivity.this.isFinishing()) {
@@ -278,6 +278,7 @@ public class PlacesListActivity extends ListActivity {
 				showRetryAlert(message, taskType,
 						Settings.ACTION_WIRELESS_SETTINGS, buttonText);
 			} else {
+				message += e.toString();
 				showDefaultExceptionAlert(message);
 			}
 		}
@@ -361,9 +362,15 @@ public class PlacesListActivity extends ListActivity {
 			String postalCode = "";
 
 			try {
+				if (m_locationService == null) {
+					throw new GoedkoopTankenException("LocationService is null", null);
+				}
 				Location location = m_locationService
-						.getCurrentLocation(m_locationManager);
+						.getCurrentLocation(m_locationManager);				
 				app.setLocation(location);
+				if (app == null) {
+					throw new GoedkoopTankenException("GoedkoopTanken app is null", null);
+				}
 			} catch (Exception e) {
 				m_exception = e;
 			}
