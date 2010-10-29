@@ -65,9 +65,5 @@ public class GoedkoopTankenActivity extends Activity {
 				startActivityForResult(switchIntent, 0);
 			}
 		});
-		
-	    // Start the tracker in manual dispatch mode...
-	    GoedkoopTankenApp.getTracker().start("UA-642674-2", this);
-	    GoedkoopTankenApp.getTracker().trackPageView("/GoedkoopTankenActivity/1.5");
 	}
 }

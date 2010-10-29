@@ -82,7 +82,6 @@ public class PlacesMapActivity extends MapActivity {
 			// Geocode all places and place markers on map
 			new GeocodeTask().execute();
 		}
-		GoedkoopTankenApp.getTracker().trackPageView("/PlacesMapActivity/1.5");
 	}
 
 	@Override
@@ -102,7 +101,7 @@ public class PlacesMapActivity extends MapActivity {
 			try {
 				List<Place> places = app.getPlaces();
 
-				for (Place p : places) {
+		 		for (Place p : places) {
 					if (p.getPoint() == null) {
 						double[] latlong = m_geocodingService.getLocation(p);
 

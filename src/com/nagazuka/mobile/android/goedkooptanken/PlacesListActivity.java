@@ -92,8 +92,6 @@ public class PlacesListActivity extends ListActivity {
 			new LocationTask().execute();
 		}
 		registerForContextMenu(getListView());
-		
-		GoedkoopTankenApp.getTracker().trackPageView("/PlacesListActivity/1.5");		
 	}
 
 	@Override
