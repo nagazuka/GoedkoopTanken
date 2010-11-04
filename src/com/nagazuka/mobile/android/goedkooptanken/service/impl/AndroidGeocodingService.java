@@ -16,8 +16,8 @@ import com.nagazuka.mobile.android.goedkooptanken.exception.NetworkException;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.service.GeocodingService;
 
-public class GoogleGeocodingService implements GeocodingService {
-	private static final String TAG = GoogleGeocodingService.class.getName();
+public class AndroidGeocodingService implements GeocodingService {
+	private static final String TAG = AndroidGeocodingService.class.getName();
 
 	@Override
 	public String getPostalCode(double latitude, double longitude)

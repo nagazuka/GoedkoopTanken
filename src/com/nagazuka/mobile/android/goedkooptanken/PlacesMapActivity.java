@@ -1,7 +1,6 @@
 package com.nagazuka.mobile.android.goedkooptanken;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import android.graphics.drawable.Drawable;
@@ -17,10 +16,9 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
-import com.nagazuka.mobile.android.goedkooptanken.model.PlaceDistanceComparator;
 import com.nagazuka.mobile.android.goedkooptanken.service.GeocodingService;
 import com.nagazuka.mobile.android.goedkooptanken.service.UploadService;
-import com.nagazuka.mobile.android.goedkooptanken.service.impl.GoogleGeocodingService;
+import com.nagazuka.mobile.android.goedkooptanken.service.impl.AndroidGeocodingService;
 import com.nagazuka.mobile.android.goedkooptanken.service.impl.ZukaService;
 
 public class PlacesMapActivity extends MapActivity {
@@ -30,11 +28,15 @@ public class PlacesMapActivity extends MapActivity {
 	private GoedkoopTankenApp app;
 	private MapView mapView;
 
-	private GeocodingService m_geocodingService = new GoogleGeocodingService();;
+	private GeocodingService m_geocodingService = new AndroidGeocodingService();;
 	private List<Overlay> mapOverlays = null;
-	private Drawable pinDrawable = null;
+	private Drawable pinDrawableCheap = null;
+	private Drawable pinDrawableExpensive = null;
+	private Drawable pinDrawableNormal = null;
 	private Drawable userDrawable = null;
-	private PlacesItemizedOverlay itemizedoverlay = null;
+	private PlacesItemizedOverlay itemizedoverlayCheap = null;
+	private PlacesItemizedOverlay itemizedoverlayNormal = null;
+	private PlacesItemizedOverlay itemizedoverlayExpensive = null;
 	private PlacesItemizedOverlay userOverlay = null;
 
 	/** Called when the activity is first created. */
@@ -60,11 +62,22 @@ public class PlacesMapActivity extends MapActivity {
 					(int) (longitude * 1E6));
 
 			mapOverlays = mapView.getOverlays();
-			pinDrawable = this.getResources().getDrawable(R.drawable.map_pin);
+			pinDrawableCheap = this.getResources().getDrawable(
+					R.drawable.map_pin_green);
+			pinDrawableNormal = this.getResources().getDrawable(
+					R.drawable.map_pin);
+			pinDrawableExpensive = this.getResources().getDrawable(
+					R.drawable.map_pin_red);
+
 			userDrawable = this.getResources().getDrawable(R.drawable.ic_robot);
 
 			userOverlay = new PlacesItemizedOverlay(userDrawable, this);
-			itemizedoverlay = new PlacesItemizedOverlay(pinDrawable, this);
+			itemizedoverlayCheap = new PlacesItemizedOverlay(pinDrawableCheap,
+					this);
+			itemizedoverlayNormal = new PlacesItemizedOverlay(
+					pinDrawableNormal, this);
+			itemizedoverlayExpensive = new PlacesItemizedOverlay(
+					pinDrawableExpensive, this);
 
 			String currentLocationTitle = getResources().getString(
 					R.string.current_location_title);
@@ -90,7 +103,10 @@ public class PlacesMapActivity extends MapActivity {
 	}
 
 	private class GeocodeTask extends AsyncTask<Void, Place, Void> {
-		private boolean placedFirstMarker = false;
+
+		private boolean placedFirstNormalMarker = false;
+		private boolean placedFirstCheapMarker = false;
+		private boolean placedFirstExpensiveMarker = false;
 
 		@Override
 		public void onPreExecute() {
@@ -100,8 +116,9 @@ public class PlacesMapActivity extends MapActivity {
 		protected Void doInBackground(Void... params) {
 			try {
 				List<Place> places = app.getPlaces();
+				Place.calculatePriceIndicators(places);
 
-		 		for (Place p : places) {
+				for (Place p : places) {
 					if (p.getPoint() == null) {
 						double[] latlong = m_geocodingService.getLocation(p);
 
@@ -129,19 +146,37 @@ public class PlacesMapActivity extends MapActivity {
 
 			OverlayItem overlayitem = new OverlayItem(point, p.getName(), p
 					.getSummary());
-
-			if (!placedFirstMarker) {
-				mapOverlays.add(itemizedoverlay);
+			switch (p.getPriceIndicator()) {
+			case Place.CHEAP:
+				if (!placedFirstCheapMarker) {
+					mapOverlays.add(itemizedoverlayCheap);
+				}
+				itemizedoverlayCheap.addOverlay(overlayitem);
+				break;
+			case Place.NORMAL:
+				if (!placedFirstNormalMarker) {
+					mapOverlays.add(itemizedoverlayNormal);
+				}
+				itemizedoverlayNormal.addOverlay(overlayitem);
+				break;
+			case Place.EXPENSIVE:
+				if (!placedFirstExpensiveMarker) {
+					mapOverlays.add(itemizedoverlayExpensive);
+				}
+				itemizedoverlayExpensive.addOverlay(overlayitem);
+				break;				
+			default:
+				Log.e(TAG, "Unknown price indicator [" + p.getPriceIndicator()
+						+ "]");
+				break;
 			}
 
-			itemizedoverlay.addOverlay(overlayitem);
 			mapView.invalidate();
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
 			mapView.invalidate();
-			// new UploadTask().execute();
 		}
 	}
 

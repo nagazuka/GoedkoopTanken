@@ -1,5 +1,12 @@
 package com.nagazuka.mobile.android.goedkooptanken.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+
+import android.util.Log;
+
 import com.google.android.maps.GeoPoint;
 
 public class Place {
@@ -11,6 +18,13 @@ public class Place {
 	private String postalCode = "";
 	private String observationDate = "";
 	private GeoPoint point = null;
+
+	private int priceIndicator = Place.NORMAL;
+
+	private static final String TAG = Place.class.getName();
+	public static final int CHEAP = 1;
+	public static final int NORMAL = 2;
+	public static final int EXPENSIVE = 3;
 
 	public Place() {
 	}
@@ -33,6 +47,14 @@ public class Place {
 
 	public String getTown() {
 		return town;
+	}
+
+	public void setPriceIndicator(int priceIndicator) {
+		this.priceIndicator = priceIndicator;
+	}
+
+	public int getPriceIndicator() {
+		return priceIndicator;
 	}
 
 	public double getPrice() {
@@ -82,7 +104,7 @@ public class Place {
 	public GeoPoint getPoint() {
 		return point;
 	}
-	
+
 	public String getSummary() {
 		String result = getAddress() + "\n";
 		result += getPostalCode() + "\n";
@@ -90,7 +112,7 @@ public class Place {
 		result += String.format("Literprijs: \u20AC %.2f\n", getPrice());
 		result += String.format("Geschatte afstand: %.2f km\n", getDistance());
 		result += "Peildatum: " + getObservationDate() + "\n";
-		return result; 
+		return result;
 	}
 
 	public void setObservationDate(String observationDate) {
@@ -99,5 +121,40 @@ public class Place {
 
 	public String getObservationDate() {
 		return observationDate;
+	}
+
+	public static List<Place> calculatePriceIndicators(List<Place> places) {
+		// select all distinct prices
+		// first is cheapest
+		// second two are normal
+		// the rest is expensive
+
+		List<Double> priceList = new ArrayList<Double>();
+		for (Place p : places) {
+			priceList.add(p.getPrice());
+		}
+
+		// remove duplicate prices
+		HashSet<Double> noDuplicates = new HashSet<Double>(priceList);
+		priceList.clear();
+		priceList.addAll(noDuplicates);
+
+		Collections.sort(priceList);
+		// set price indicators based on index in priceList
+		for (Place p : places) {
+			int index = priceList.indexOf(new Double(p.getPrice()));
+			if (index == 0) {
+				p.setPriceIndicator(Place.CHEAP);
+			} else if (index > 0 && index <= 2) {
+				p.setPriceIndicator(Place.NORMAL);
+			} else if (index > 2) {
+				p.setPriceIndicator(Place.EXPENSIVE);
+			}
+			Log.d(TAG, "Set price indicator for price [" + p.getPrice()
+					+ "] with price list index [" + index + "] to ["
+					+ p.getPriceIndicator() + "]");
+		}
+
+		return places;
 	}
 }

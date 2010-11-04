@@ -41,7 +41,7 @@ import com.nagazuka.mobile.android.goedkooptanken.service.DownloadService;
 import com.nagazuka.mobile.android.goedkooptanken.service.GeocodingService;
 import com.nagazuka.mobile.android.goedkooptanken.service.LocationService;
 import com.nagazuka.mobile.android.goedkooptanken.service.impl.AndroidLocationService;
-import com.nagazuka.mobile.android.goedkooptanken.service.impl.GoogleGeocodingService;
+import com.nagazuka.mobile.android.goedkooptanken.service.impl.AndroidGeocodingService;
 import com.nagazuka.mobile.android.goedkooptanken.service.impl.ZukaService;
 
 public class PlacesListActivity extends ListActivity {
@@ -404,7 +404,7 @@ public class PlacesListActivity extends ListActivity {
 		@Override
 		public void onPreExecute() {
 			m_exception = null;
-			m_geocodingService = new GoogleGeocodingService();
+			m_geocodingService = new AndroidGeocodingService();
 
 			showDialog(DIALOG_PROGRESS);
 			m_progressDialog.setProgress((int)(MAX_PROGRESS*0.33));			
