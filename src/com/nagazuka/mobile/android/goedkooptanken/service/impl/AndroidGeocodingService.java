@@ -33,20 +33,22 @@ public class AndroidGeocodingService implements GeocodingService {
 			adresses = geocoder
 					.getFromLocation(latitude, longitude, maxResults);
 		} catch (IOException e) {
-			Log.e(TAG, "<< Error looking up address with Geocoder >>");
+			Log.e(TAG, "<< Error looking up address with Geocoder for lat ["
+					+ latitude + "] lng [" + longitude + "] >>");
 			e.printStackTrace();
 			throw new NetworkException(
-					"Uw postcode kan niet bepaald worden. Toegang tot het internet is vereist.", e);
+					"Uw postcode kan niet bepaald worden. Toegang tot het internet is vereist.",
+					e);
 		}
 
 		if (adresses != null && !adresses.isEmpty()) {
 			Address address = adresses.get(0);
 			postalCode = address.getPostalCode();
 			Log.d(TAG, "<< Geocoder found postalCode: " + postalCode + ">>");
-		}
-		else {
+		} else {
 			throw new NetworkException(
-					"Uw postcode kan niet bepaald worden. Onbekende fout opgetreden.", null);
+					"Uw postcode kan niet bepaald worden. Onbekende fout opgetreden.",
+					null);
 		}
 
 		return postalCode;

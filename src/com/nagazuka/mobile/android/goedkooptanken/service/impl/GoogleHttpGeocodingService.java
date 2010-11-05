@@ -1,6 +1,8 @@
 package com.nagazuka.mobile.android.goedkooptanken.service.impl;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.List;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -8,19 +10,26 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.util.Log;
 
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import com.nagazuka.mobile.android.goedkooptanken.exception.GoedkoopTankenException;
 import com.nagazuka.mobile.android.goedkooptanken.exception.NetworkException;
+import com.nagazuka.mobile.android.goedkooptanken.model.AddressComponent;
+import com.nagazuka.mobile.android.goedkooptanken.model.AddressComponentType;
+import com.nagazuka.mobile.android.goedkooptanken.model.GeocodingResult;
+import com.nagazuka.mobile.android.goedkooptanken.model.LocationType;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.service.GeocodingService;
 
 public abstract class GoogleHttpGeocodingService implements GeocodingService {
-  /*
 	private static final String TAG = GoogleHttpGeocodingService.class
 			.getName();
 	private static final String URL_GOOGLE_API = "http://maps.googleapis.com/maps/api/geocode/";
@@ -44,33 +53,6 @@ public abstract class GoogleHttpGeocodingService implements GeocodingService {
 		return URL + params;
 	}
 	
-	private static String parsePostalCode(String jsonResponse) throws GoedkoopTankenException {
-		String result = "";
-		try {
-			JSONObject response = new JSONObject(jsonResponse);
-
-			if (response.has("status") && response.getJSONObject("status").equals("OK")) {
-				JSONArray results = response.getJSONArray("results");
-
-				for (int i = 0; i < results.length(); i++) {
-					JSONObject geoResult = results.getJSONObject(i);
-					if (geoResult.has("types")) {
-						JSONArray types = geoResult.getJSONArray("types");
-						for()
-					}
-				}
-			}	
-			else {
-					
-			}			
-		} catch (JSONException e) {
-			e.printStackTrace();
-			throw new GoedkoopTankenException(
-					"Verwerkingsfout opgetreden bij het opvragen de postcode", e);
-		}
-	
-		return result;
-	}
 
 	@Override
 	public double[] getLocation(Place place) throws GoedkoopTankenException {
@@ -112,5 +94,51 @@ public abstract class GoogleHttpGeocodingService implements GeocodingService {
 
 		return response;
 	}
-*/
+	
+	private String parsePostalCode(String response) {
+		String postalCode = "";
+		try {
+			GeocodingResult geoResult = unmarshall(response);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}		
+		return postalCode;
+	}
+	
+	protected GeocodingResult unmarshall(String jsonString) {
+		Gson gson = getGsonBuilder().create();
+		return gson.fromJson(jsonString, GeocodingResult.class);
+	}
+	
+	/**
+	 * Gets the gson builder.
+	 * 
+	 * @return the gson builder
+	 */
+	protected GsonBuilder getGsonBuilder() {
+		GsonBuilder builder = new GsonBuilder();
+		builder.setDateFormat(RFC822DATEFORMAT);
+		builder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+		builder.registerTypeAdapter(LocationType.class, new JsonDeserializer<LocationType>() {
+			@Override
+			public LocationType deserialize(JsonElement arg0, Type arg1,
+					JsonDeserializationContext arg2) throws JsonParseException {
+				return LocationType.fromValue(arg0.getAsString());
+			}
+		});
+		builder.registerTypeAdapter(AddressComponentType.class, new JsonDeserializer<AddressComponentType>() {
+			@Override
+			public AddressComponentType deserialize(JsonElement arg0, Type arg1,
+					JsonDeserializationContext arg2) throws JsonParseException {
+				return AddressComponentType.fromValue(arg0.getAsString());
+			}
+		});
+		
+		return builder;
+	}
+
+    /** The Constant RFC822DATEFORMAT. */
+    public static final String RFC822DATEFORMAT = "EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z";
+
 }
