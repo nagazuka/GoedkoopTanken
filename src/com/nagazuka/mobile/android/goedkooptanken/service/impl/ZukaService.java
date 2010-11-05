@@ -44,7 +44,14 @@ public class ZukaService implements DownloadService, UploadService {
 
 	public List<Place> fetchPlaces(PlacesParams params)
 			throws GoedkoopTankenException {
-		List<Place> result = Collections.emptyList();
+		if (params.getPostcode() == null) {
+			throw new GoedkoopTankenException("Kan tankstations niet downloaden, postcode is leeg",null);
+		}
+		if (params.getPostcode() == null) {
+			throw new GoedkoopTankenException("Kan tankstations niet downloaden, brandstof is leeg",null);
+		}
+				
+		List<Place> result = Collections.emptyList();		
 		String response = download(params);
 		result = convertFromJSON(response);
 		return result;

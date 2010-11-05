@@ -56,7 +56,6 @@ public class PlacesListActivity extends ListActivity {
 	private ProgressDialog m_progressDialog;
 
 	private List<Place> m_places = null;
-	private String m_postalCode = "";
 
 	private static final int DIALOG_PROGRESS = 1;
 	private static final int DIALOG_SEARCH = 2;
@@ -137,8 +136,7 @@ public class PlacesListActivity extends ListActivity {
 					InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 					imm.hideSoftInputFromWindow(edittext.getWindowToken(), 0);
 					if (inputString.length() == 4) {
-						m_postalCode = inputString;
-						app.setPostalCode(m_postalCode);
+						app.setPostalCode(inputString);
 						new DownloadTask().execute();
 					}
 					dialog.dismiss();
@@ -275,8 +273,7 @@ public class PlacesListActivity extends ListActivity {
 						.getString(R.string.error_alert_network_button);
 				showRetryAlert(message, taskType,
 						Settings.ACTION_WIRELESS_SETTINGS, buttonText);
-			} else {
-				message += e.toString();
+			} else {				
 				showDefaultExceptionAlert(message);
 			}
 		}
@@ -337,7 +334,7 @@ public class PlacesListActivity extends ListActivity {
 						R.string.error_alert_retry_button, retry).show();
 	}
 
-	private class LocationTask extends AsyncTask<Void, Integer, String> {
+	private class LocationTask extends AsyncTask<Void, Integer, Location> {
 
 		private Exception m_exception = null;
 		private LocationManager m_locationManager = null;
@@ -356,24 +353,21 @@ public class PlacesListActivity extends ListActivity {
 		}
 
 		@Override
-		protected String doInBackground(Void... params) {
-			String postalCode = "";
+		protected Location doInBackground(Void... params) {
+			Location location = null;
 
 			try {
 				if (m_locationService == null) {
 					throw new GoedkoopTankenException("LocationService is null", null);
 				}
-				Location location = m_locationService
-						.getCurrentLocation(m_locationManager);				
-				app.setLocation(location);
-				if (app == null) {
-					throw new GoedkoopTankenException("GoedkoopTanken app is null", null);
-				}
+				location = m_locationService
+						.getCurrentLocation(m_locationManager);	
+				
 			} catch (Exception e) {
 				m_exception = e;
 			}
 
-			return postalCode;
+			return location;
 		}
 
 		@Override
@@ -382,15 +376,18 @@ public class PlacesListActivity extends ListActivity {
 		}
 
 		@Override
-		protected void onPostExecute(String result) {
+		protected void onPostExecute(Location location) {
 			m_progressDialog.setProgress((int) (MAX_PROGRESS * 0.33));
-			m_postalCode = result;
-
+			
 			if (m_exception != null) {
 				m_progressDialog.dismiss();
 				showExceptionAlert(m_exception.getMessage(), m_exception,
-						LOCATION_TASK);
+						LOCATION_TASK);			
+			} else if (location == null) {
+				m_progressDialog.dismiss();
+				showExceptionAlert("Locatie onbekend, kan tankstations niet downloaden", null, LOCATION_TASK);
 			} else {
+				app.setLocation(location);
 				new GeocodeTask().execute();
 			}
 		}
@@ -424,7 +421,7 @@ public class PlacesListActivity extends ListActivity {
 				// Transform location to address using reverse geocoding
 				postalCode = m_geocodingService.getPostalCode(latitude,
 						longitude);
-				app.setPostalCode(postalCode);
+
 			} catch (Exception e) {
 				m_exception = e;
 			}
@@ -438,20 +435,20 @@ public class PlacesListActivity extends ListActivity {
 		}
 
 		@Override
-		protected void onPostExecute(String result) {
+		protected void onPostExecute(String postalCode) {
 			m_progressDialog.setProgress((int) (MAX_PROGRESS * 0.67));
-			m_postalCode = result;
-
+			
 			if (m_exception != null) {
 				m_progressDialog.dismiss();
 				showExceptionAlert(m_exception.getMessage(), m_exception,
 						GEOCODE_TASK);
-			} else if (m_postalCode == null || m_postalCode.length() == 0) {
+			} else if (postalCode == null || postalCode.length() == 0) {
 				m_progressDialog.dismiss();
 				showExceptionAlert(
 						"Postcode onbekend, kan tankstations niet downloaden",
 						null, GEOCODE_TASK);
 			} else {
+				app.setPostalCode(postalCode);
 				new DownloadTask().execute();
 			}
 		}
