@@ -287,8 +287,11 @@ public class PlacesListActivity extends ListActivity {
 			}
 		};
 
-		PlacesAlertDialogBuilder.createDefaultExceptionAlert(this, message,
-				positiveListener).show();
+		new AlertDialog.Builder(this)
+		.setTitle(R.string.error_alert_title)
+		.setMessage(message)
+		.setPositiveButton(R.string.error_alert_pos_button, positiveListener)
+		.show();
 	}
 
 	private void showRetryAlert(final String message, final int taskType,
