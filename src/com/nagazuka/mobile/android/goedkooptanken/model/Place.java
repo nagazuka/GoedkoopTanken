@@ -1,8 +1,5 @@
 package com.nagazuka.mobile.android.goedkooptanken.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 
 import android.util.Log;
@@ -124,35 +121,40 @@ public class Place {
 	}
 
 	public static List<Place> calculatePriceIndicators(List<Place> places) {
-		// select all distinct prices
-		// first is cheapest
-		// second two are normal
-		// the rest is expensive
-
-		List<Double> priceList = new ArrayList<Double>();
-		for (Place p : places) {
-			priceList.add(p.getPrice());
-		}
-
-		// remove duplicate prices
-		HashSet<Double> noDuplicates = new HashSet<Double>(priceList);
-		priceList.clear();
-		priceList.addAll(noDuplicates);
-
-		Collections.sort(priceList);
-		// set price indicators based on index in priceList
-		for (Place p : places) {
-			int index = priceList.indexOf(new Double(p.getPrice()));
-			if (index == 0) {
-				p.setPriceIndicator(Place.CHEAP);
-			} else if (index > 0 && index <= 2) {
-				p.setPriceIndicator(Place.NORMAL);
-			} else if (index > 2) {
-				p.setPriceIndicator(Place.EXPENSIVE);
+		if (places.size() > 0) {
+			double minPrice = places.get(0).getPrice();
+			double maxPrice = places.get(0).getPrice();
+			for (Place p : places) {
+				double price = p.getPrice();
+				if (price < minPrice) {
+					minPrice = price;
+				}
+				if (price > maxPrice) {
+					maxPrice = price;
+				}
 			}
-			Log.d(TAG, "Set price indicator for price [" + p.getPrice()
-					+ "] with price list index [" + index + "] to ["
-					+ p.getPriceIndicator() + "]");
+
+			double priceDiff = maxPrice - minPrice;
+			double firstTreshold = minPrice + (priceDiff * 0.33);
+			double secondTreshold = minPrice + (priceDiff * 0.67);
+
+			Log.d(TAG, "First treshold [" + firstTreshold
+					+ "], Second treshold [" + secondTreshold + "]");
+
+			// set price indicators based on index in priceList
+			for (Place p : places) {
+				double price = p.getPrice();
+
+				if (price < firstTreshold) {
+					p.setPriceIndicator(Place.CHEAP);
+				} else if (price < secondTreshold) {
+					p.setPriceIndicator(Place.NORMAL);
+				} else {
+					p.setPriceIndicator(Place.EXPENSIVE);
+				}
+				Log.d(TAG, "Set price indicator for price [" + p.getPrice()
+						+ "] to [" + p.getPriceIndicator() + "]");
+			}
 		}
 
 		return places;
