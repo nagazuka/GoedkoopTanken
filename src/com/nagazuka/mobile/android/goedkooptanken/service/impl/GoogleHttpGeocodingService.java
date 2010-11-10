@@ -37,7 +37,7 @@ import com.nagazuka.mobile.android.goedkooptanken.exception.NetworkException;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.service.GeocodingService;
 
-public abstract class GoogleHttpGeocodingService implements GeocodingService {
+public class GoogleHttpGeocodingService implements GeocodingService {
 	private static final String TAG = GoogleHttpGeocodingService.class
 			.getName();
 	private static final String URL_GOOGLE_API = "http://maps.googleapis.com/maps/api/geocode/";
@@ -119,7 +119,12 @@ public abstract class GoogleHttpGeocodingService implements GeocodingService {
 							null);
 				}
 			}
+			else {
+				Log.d(TAG, "GoogleGeocoding service response is OK");
+						
+			}
 			JSONArray results = getResultsArray(jsonResponse);
+			Log.d(TAG, "GoogleGeocoding service response has ["+results.length()+"] results");
 			postalCode = getPostalCode(results);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -128,12 +133,14 @@ public abstract class GoogleHttpGeocodingService implements GeocodingService {
 	}
 
 	private String getPostalCode(JSONArray results) throws JSONException {
+		String postalCode = "";
 		for (int i = 0; i < results.length(); i++) {
 			JSONObject result = (JSONObject) results.get(i);
 			JSONArray addrComps = getAddressComponents(result);
-			getPostalCodeFromAddressComponents(addrComps);
+			Log.d(TAG, "GoogleGeocoding service result has ["+addrComps.length()+"] addressComponents");
+			postalCode = getPostalCodeFromAddressComponents(addrComps);
 		}
-		return null;
+		return postalCode;
 	}
 
 	private JSONArray getAddressComponents(JSONObject result)
@@ -148,12 +155,17 @@ public abstract class GoogleHttpGeocodingService implements GeocodingService {
 	private String getPostalCodeFromAddressComponents(
 			JSONArray addressComponents) throws JSONException {
 		String postalCode = null;
+		
 		for (int i = 0; i < addressComponents.length(); i++) {
 			JSONObject addrComp = (JSONObject) addressComponents.get(i);
+			Log.d(TAG, "GoogleGeocoding service addrComp ["+addrComp +"]");
 			if (addrComp.has("types")) {
+				Log.d(TAG, "GoogleGeocoding service has types component]");
 				JSONArray types = addrComp.getJSONArray("types");
 				if (hasPostalCodeType(types)) {
+					Log.d(TAG, "GoogleGeocoding service has postal_code in types component]");
 					postalCode = getPostalCodeFromAddressComponent(addrComp);
+					Log.d(TAG, "GoogleGeocoding service parsed postal_code ["+postalCode+"]");
 					break;
 				}
 			}
@@ -165,8 +177,11 @@ public abstract class GoogleHttpGeocodingService implements GeocodingService {
 			throws JSONException {
 		String postalCode = null;
 		if (addrComp.has("long_name")) {
+			Log.d(TAG, "GoogleGeocoding service has long_name in addr component]");
 			postalCode = addrComp.getString("long_name");
+			Log.d(TAG, "GoogleGeocoding service has postalCode in addr component => ["+postalCode+"]");
 		} else if (addrComp.has("short_name")) {
+			Log.d(TAG, "GoogleGeocoding service has short_name in addr component]");
 			postalCode = addrComp.getString("short_name");
 		}
 		return postalCode;
