@@ -60,7 +60,7 @@ import com.nagazuka.mobile.android.goedkooptanken.service.DownloadService;
 import com.nagazuka.mobile.android.goedkooptanken.service.GeocodingService;
 import com.nagazuka.mobile.android.goedkooptanken.service.LocationService;
 import com.nagazuka.mobile.android.goedkooptanken.service.impl.AndroidLocationService;
-import com.nagazuka.mobile.android.goedkooptanken.service.impl.AndroidGeocodingService;
+import com.nagazuka.mobile.android.goedkooptanken.service.impl.GoogleHttpGeocodingService;
 import com.nagazuka.mobile.android.goedkooptanken.service.impl.ZukaService;
 
 public class PlacesListActivity extends ListActivity {
@@ -349,8 +349,8 @@ public class PlacesListActivity extends ListActivity {
 
 		new AlertDialog.Builder(PlacesListActivity.this).setTitle(
 				res.getString(R.string.error_alert_title)).setMessage(message)
-				.setNegativeButton(
-						res.getString(R.string.error_alert_neg_button), back)
+				//.setNegativeButton(
+				//		res.getString(R.string.error_alert_neg_button), back)
 				.setNeutralButton(buttonText, settings).setPositiveButton(
 						R.string.error_alert_retry_button, retry).show();
 	}
@@ -427,7 +427,7 @@ public class PlacesListActivity extends ListActivity {
 		@Override
 		public void onPreExecute() {
 			m_exception = null;
-			m_geocodingService = new AndroidGeocodingService();
+			m_geocodingService = new GoogleHttpGeocodingService();
 
 			showDialog(DIALOG_PROGRESS);
 			m_progressDialog.setProgress(progress);
