@@ -43,7 +43,8 @@ public class PlacesTabActivity extends TabActivity {
 
 		// Initialize a TabSpec for each tab and add it to the TabHost
 		spec = tabHost.newTabSpec("list").setIndicator(
-				res.getString(R.string.results_label)).setContent(
+				res.getString(R.string.results_label),
+				res.getDrawable(R.drawable.ic_tab_list_icons)).setContent(
 				intent);
 		tabHost.addTab(spec);
 
@@ -51,7 +52,8 @@ public class PlacesTabActivity extends TabActivity {
 		intent = new Intent().setClass(this, PlacesMapActivity.class);
 		
 		spec = tabHost.newTabSpec("map").setIndicator(
-				res.getString(R.string.map_label))
+				res.getString(R.string.map_label),
+				res.getDrawable(R.drawable.ic_tab_map_icons))
 				.setContent(intent);
 		tabHost.addTab(spec);
 
