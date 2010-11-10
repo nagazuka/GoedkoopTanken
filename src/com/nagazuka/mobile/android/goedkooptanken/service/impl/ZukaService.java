@@ -15,7 +15,7 @@
        KIND, either express or implied.  See the License for the
        specific language governing permissions and limitations
        under the License.
-*/
+ */
 package com.nagazuka.mobile.android.goedkooptanken.service.impl;
 
 import java.io.IOException;
@@ -35,7 +35,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.util.Log;
-
+import com.google.android.maps.GeoPoint;
 import com.nagazuka.mobile.android.goedkooptanken.exception.GoedkoopTankenException;
 import com.nagazuka.mobile.android.goedkooptanken.exception.NetworkException;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
@@ -47,7 +47,7 @@ public class ZukaService implements DownloadService, UploadService {
 
 	private static final String TAG = "PlacesDownloader";
 
-	private static final String URL_ZUKASERVICE = "http://zukaservice.appspot.com/goedkooptanken";
+	private static final String URL_ZUKASERVICE = "http://7.latest.zukaservice.appspot.com/goedkooptanken";
 
 	private static final String JSON_RESULTS = "results";
 	private static final String JSON_ADDRESS = "address";
@@ -58,18 +58,22 @@ public class ZukaService implements DownloadService, UploadService {
 	private static final String JSON_POSTAL_CODE = "postalCode";
 	private static final String JSON_DISTANCE = "distance";
 	private static final String JSON_TOWN = "town";
-	private static final String JSON_DATE = "date";
+	private static final String JSON_DATE = "lat";
+	private static final String JSON_LAT = "lat";
+	private static final String JSON_LNG = "lng";
 
 	public List<Place> fetchPlaces(PlacesParams params)
 			throws GoedkoopTankenException {
 		if (params.getPostcode() == null) {
-			throw new GoedkoopTankenException("Kan tankstations niet downloaden, postcode is leeg",null);
+			throw new GoedkoopTankenException(
+					"Kan tankstations niet downloaden, postcode is leeg", null);
 		}
 		if (params.getPostcode() == null) {
-			throw new GoedkoopTankenException("Kan tankstations niet downloaden, brandstof is leeg",null);
+			throw new GoedkoopTankenException(
+					"Kan tankstations niet downloaden, brandstof is leeg", null);
 		}
-				
-		List<Place> result = Collections.emptyList();		
+
+		List<Place> result = Collections.emptyList();
 		String response = download(params);
 		result = convertFromJSON(response);
 		return result;
@@ -127,7 +131,8 @@ public class ZukaService implements DownloadService, UploadService {
 				if (!getJSONString(context, JSON_CONTEXT_RESULT).equals(
 						"Success")) {
 					throw new GoedkoopTankenException(
-							"Onbekende fout opgetreden bij downloaden tankstations", null);
+							"Onbekende fout opgetreden bij downloaden tankstations",
+							null);
 				}
 			}
 
@@ -144,18 +149,42 @@ public class ZukaService implements DownloadService, UploadService {
 					String name = getJSONString(place, JSON_NAME);
 					double price = getJSONDouble(place, JSON_PRICE);
 					double distance = getJSONDouble(place, JSON_DISTANCE);
-					String date = getJSONString(place, JSON_DATE);					
-
-					result.add(new Place(name, address, postalCode, town,
-							price, distance, date));
+					String date = getJSONString(place, JSON_DATE);
+					Place newPlace =new Place(name, address, postalCode, town,
+							price, distance, date); 
+					if (place.has(JSON_LAT) && place.has(JSON_LNG)) {
+						GeoPoint point = getGeoPoint(place);
+						newPlace.setPoint(point);
+					}
+					result.add(newPlace);
 				}
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 			throw new GoedkoopTankenException(
-					"Verwerkingsfout opgetreden bij downloaden van tankstations", e);
+					"Verwerkingsfout opgetreden bij downloaden van tankstations",
+					e);
 		}
 		return result;
+	}
+
+	private GeoPoint getGeoPoint(JSONObject place) throws JSONException {
+		String latStr = getJSONString(place, JSON_LAT);
+		String lngStr = getJSONString(place, JSON_LNG);
+
+		GeoPoint point = null;
+		try {
+			double lat = Double.valueOf(latStr);
+			double lng = Double.valueOf(lngStr);
+			point = new GeoPoint((int) (lat * 1E6), (int) (lng * 1E6));
+			
+			Log.d(TAG, "Parsed lat/lng [" + lat + "] [" + lng + "]");
+		} catch (Exception e) {
+			Log.e(TAG, "Can not parse lat/lng in place response: [" + latStr
+					+ "] [" + lngStr + "]");
+		}
+
+		return point;
 	}
 
 	private String getJSONString(JSONObject json, String key)
@@ -177,7 +206,7 @@ public class ZukaService implements DownloadService, UploadService {
 		}
 		return result;
 	}
-	
+
 	public String upload(PlacesParams params) throws NetworkException {
 		String response = "";
 		try {
