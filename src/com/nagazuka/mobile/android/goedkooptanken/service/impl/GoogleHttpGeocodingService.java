@@ -50,7 +50,11 @@ public class GoogleHttpGeocodingService implements GeocodingService {
 		String url = constructReverseGeocodingURL(latitude, longitude);
 		String jsonResponse = download(url);
 		postalCode = parsePostalCode(jsonResponse);
-
+		
+		if (postalCode == null) {
+			throw new NetworkException("Postcode kon niet opgevraagd worden. Technische fout opgetreden", null);
+		}
+		
 		return postalCode;
 	}
 
@@ -91,14 +95,11 @@ public class GoogleHttpGeocodingService implements GeocodingService {
 		} catch (ClientProtocolException c) {
 			c.printStackTrace();
 			throw new NetworkException(
-					"Er zijn netwerkproblemen opgetreden bij het aanroepen van de geocoder",
-					c);
+					"Er zijn netwerkproblemen opgetreden bij het opvragen van de postcode",	c);
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new NetworkException(
-					"Er zijn netwerkproblemen opgetreden bij het aanroepen van de geocoder",
-					e);
-
+					"Er zijn netwerkproblemen opgetreden bij het opvragen van de postcode",	e);
 		}
 
 		return response;
@@ -133,12 +134,17 @@ public class GoogleHttpGeocodingService implements GeocodingService {
 	}
 
 	private String getPostalCode(JSONArray results) throws JSONException {
-		String postalCode = "";
-		for (int i = 0; i < results.length(); i++) {
+		String postalCode = null;
+		boolean postalCodeFound = false;
+		for (int i = 0; i < results.length() && !postalCodeFound; i++) {
 			JSONObject result = (JSONObject) results.get(i);
 			JSONArray addrComps = getAddressComponents(result);
 			Log.d(TAG, "GoogleGeocoding service result has ["+addrComps.length()+"] addressComponents");
 			postalCode = getPostalCodeFromAddressComponents(addrComps);
+			
+			if (postalCode != null) {
+				postalCodeFound = true;
+			}
 		}
 		return postalCode;
 	}
@@ -156,7 +162,8 @@ public class GoogleHttpGeocodingService implements GeocodingService {
 			JSONArray addressComponents) throws JSONException {
 		String postalCode = null;
 		
-		for (int i = 0; i < addressComponents.length(); i++) {
+		boolean foundPostalCode  = false;
+		for (int i = 0; i < addressComponents.length() && !foundPostalCode; i++) {
 			JSONObject addrComp = (JSONObject) addressComponents.get(i);
 			Log.d(TAG, "GoogleGeocoding service addrComp ["+addrComp +"]");
 			if (addrComp.has("types")) {
@@ -166,7 +173,7 @@ public class GoogleHttpGeocodingService implements GeocodingService {
 					Log.d(TAG, "GoogleGeocoding service has postal_code in types component]");
 					postalCode = getPostalCodeFromAddressComponent(addrComp);
 					Log.d(TAG, "GoogleGeocoding service parsed postal_code ["+postalCode+"]");
-					break;
+					foundPostalCode = true;					
 				}
 			}
 		}
