@@ -47,7 +47,7 @@ public class ZukaService implements DownloadService, UploadService {
 
 	private static final String TAG = "PlacesDownloader";
 
-	private static final String URL_ZUKASERVICE = "http://zukaservice.appspot.com/goedkooptanken";
+	private static final String URL_ZUKASERVICE = "http://7.latest.zukaservice.appspot.com/goedkooptanken";
 
 	private static final String JSON_RESULTS = "results";
 	private static final String JSON_ADDRESS = "address";
@@ -58,7 +58,7 @@ public class ZukaService implements DownloadService, UploadService {
 	private static final String JSON_POSTAL_CODE = "postalCode";
 	private static final String JSON_DISTANCE = "distance";
 	private static final String JSON_TOWN = "town";
-	private static final String JSON_DATE = "lat";
+	private static final String JSON_DATE = "date";
 	private static final String JSON_LAT = "lat";
 	private static final String JSON_LNG = "lng";
 
