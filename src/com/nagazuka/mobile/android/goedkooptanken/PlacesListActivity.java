@@ -183,8 +183,7 @@ public class PlacesListActivity extends ListActivity {
 			ContextMenu.ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		menu.add(0, CONTEXT_MENU_MAPS_ID, 0, "Open in Google Maps");
-		// menu.add(0, CONTEXT_MENU_NAVIGATION_ID, 1,
-		// "Open in Google Navigatie");
+		menu.add(0, CONTEXT_MENU_NAVIGATION_ID, 1, "Open in Google Navigatie");
 		menu.add(0, CONTEXT_MENU_DETAILS_ID, 2, "Bekijk details");
 	}
 
@@ -265,7 +264,7 @@ public class PlacesListActivity extends ListActivity {
 		if (!navigation) {
 			geoUriString = "geo:0,0?q=Nederland, ";
 		} else {
-			geoUriString = "google.navigation:?q=Nederland, ";
+			geoUriString = "google.navigation:q=Nederland, ";
 		}
 
 		geoUriString += selectedItem.getAddress() + ", "
