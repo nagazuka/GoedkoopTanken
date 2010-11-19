@@ -156,8 +156,8 @@ public class Place {
 			double firstTreshold = minPrice + (priceDiff * 0.33);
 			double secondTreshold = minPrice + (priceDiff * 0.67);
 
-			Log.d(TAG, "First treshold [" + firstTreshold
-					+ "], Second treshold [" + secondTreshold + "]");
+			//Log.d(TAG, "First treshold [" + firstTreshold
+			//		+ "], Second treshold [" + secondTreshold + "]");
 
 			// set price indicators based on index in priceList
 			for (Place p : places) {
@@ -170,8 +170,8 @@ public class Place {
 				} else {
 					p.setPriceIndicator(Place.EXPENSIVE);
 				}
-				Log.d(TAG, "Set price indicator for price [" + p.getPrice()
-						+ "] to [" + p.getPriceIndicator() + "]");
+				//Log.d(TAG, "Set price indicator for price [" + p.getPrice()
+				//		+ "] to [" + p.getPriceIndicator() + "]");
 			}
 		}
 
