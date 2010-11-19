@@ -49,6 +49,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
+import com.flurry.android.FlurryAgent;
 import com.nagazuka.mobile.android.goedkooptanken.exception.GoedkoopTankenException;
 import com.nagazuka.mobile.android.goedkooptanken.exception.LocationException;
 import com.nagazuka.mobile.android.goedkooptanken.exception.NetworkException;
@@ -110,6 +111,24 @@ public class PlacesListActivity extends ListActivity {
 			new LocationTask().execute();
 		}
 		registerForContextMenu(getListView());
+		
+		
+	}
+	
+	@Override
+	public void onStart()
+	{
+	   super.onStart();
+	   Resources res = getResources();
+	   FlurryAgent.onStartSession(this, res.getString(R.string.flurry_key));
+       FlurryAgent.onEvent("Start ListActivity");
+	}
+
+	@Override
+	public void onStop()
+	{
+	   super.onStop();
+	   FlurryAgent.onEndSession(this);
 	}
 
 	@Override

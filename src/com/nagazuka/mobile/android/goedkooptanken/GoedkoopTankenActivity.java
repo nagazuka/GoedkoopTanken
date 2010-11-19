@@ -19,14 +19,16 @@
 package com.nagazuka.mobile.android.goedkooptanken;
 
 import android.app.Activity;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+
+import com.flurry.android.FlurryAgent;
 
 public class GoedkoopTankenActivity extends Activity {
 	public static final String PREFERENCE_FILENAME = "GoedkoopTankenPreferences";
@@ -83,5 +85,21 @@ public class GoedkoopTankenActivity extends Activity {
 				startActivityForResult(switchIntent, 0);
 			}
 		});
+	}
+
+	@Override
+	public void onStart()
+	{
+	   super.onStart();
+	   Resources res = getResources();
+	   FlurryAgent.onStartSession(this, res.getString(R.string.flurry_key));
+       FlurryAgent.onEvent("Start Application");
+	}
+
+	@Override
+	public void onStop()
+	{
+	   super.onStop();
+	   FlurryAgent.onEndSession(this);
 	}
 }

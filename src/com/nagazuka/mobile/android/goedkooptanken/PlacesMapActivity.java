@@ -21,12 +21,14 @@ package com.nagazuka.mobile.android.goedkooptanken;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.flurry.android.FlurryAgent;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
@@ -114,6 +116,24 @@ public class PlacesMapActivity extends MapActivity {
 			new GeocodeTask().execute();
 		}
 	}
+	
+	@Override
+	public void onStart()
+	{
+	   super.onStart();
+	   Resources res = getResources();
+	   FlurryAgent.onStartSession(this, res.getString(R.string.flurry_key));
+       FlurryAgent.onEvent("Start MapActivity");
+	}
+
+	@Override
+	public void onStop()
+	{
+	   super.onStop();
+	   FlurryAgent.onEndSession(this);
+	}
+
+
 
 	@Override
 	protected boolean isRouteDisplayed() {
