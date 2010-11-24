@@ -85,11 +85,11 @@ public class GoogleHttpGeocodingService implements GeocodingService {
 		try {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpGet request = new HttpGet(url);
-			Log.d(TAG, "<< HTTP Request: " + request.toString());
+			//Log.d(TAG, "<< HTTP Request: " + request.toString());
 
 			ResponseHandler<String> handler = new BasicResponseHandler();
 			response = httpClient.execute(request, handler);
-			Log.d(TAG, "<< HTTP Response: " + response);
+			//Log.d(TAG, "<< HTTP Response: " + response);
 
 			httpClient.getConnectionManager().shutdown();
 		} catch (ClientProtocolException c) {
@@ -139,7 +139,7 @@ public class GoogleHttpGeocodingService implements GeocodingService {
 		for (int i = 0; i < results.length() && !postalCodeFound; i++) {
 			JSONObject result = (JSONObject) results.get(i);
 			JSONArray addrComps = getAddressComponents(result);
-			Log.d(TAG, "GoogleGeocoding service result has ["+addrComps.length()+"] addressComponents");
+			//Log.d(TAG, "GoogleGeocoding service result has ["+addrComps.length()+"] addressComponents");
 			postalCode = getPostalCodeFromAddressComponents(addrComps);
 			
 			if (postalCode != null) {
@@ -165,14 +165,14 @@ public class GoogleHttpGeocodingService implements GeocodingService {
 		boolean foundPostalCode  = false;
 		for (int i = 0; i < addressComponents.length() && !foundPostalCode; i++) {
 			JSONObject addrComp = (JSONObject) addressComponents.get(i);
-			Log.d(TAG, "GoogleGeocoding service addrComp ["+addrComp +"]");
+			//Log.d(TAG, "GoogleGeocoding service addrComp ["+addrComp +"]");
 			if (addrComp.has("types")) {
-				Log.d(TAG, "GoogleGeocoding service has types component]");
+				//Log.d(TAG, "GoogleGeocoding service has types component]");
 				JSONArray types = addrComp.getJSONArray("types");
 				if (hasPostalCodeType(types)) {
-					Log.d(TAG, "GoogleGeocoding service has postal_code in types component]");
+					//Log.d(TAG, "GoogleGeocoding service has postal_code in types component]");
 					postalCode = getPostalCodeFromAddressComponent(addrComp);
-					Log.d(TAG, "GoogleGeocoding service parsed postal_code ["+postalCode+"]");
+					//Log.d(TAG, "GoogleGeocoding service parsed postal_code ["+postalCode+"]");
 					foundPostalCode = true;					
 				}
 			}
@@ -184,11 +184,11 @@ public class GoogleHttpGeocodingService implements GeocodingService {
 			throws JSONException {
 		String postalCode = null;
 		if (addrComp.has("long_name")) {
-			Log.d(TAG, "GoogleGeocoding service has long_name in addr component]");
+			//Log.d(TAG, "GoogleGeocoding service has long_name in addr component]");
 			postalCode = addrComp.getString("long_name");
-			Log.d(TAG, "GoogleGeocoding service has postalCode in addr component => ["+postalCode+"]");
+			//Log.d(TAG, "GoogleGeocoding service has postalCode in addr component => ["+postalCode+"]");
 		} else if (addrComp.has("short_name")) {
-			Log.d(TAG, "GoogleGeocoding service has short_name in addr component]");
+			//Log.d(TAG, "GoogleGeocoding service has short_name in addr component]");
 			postalCode = addrComp.getString("short_name");
 		}
 		return postalCode;

@@ -28,7 +28,7 @@ import com.nagazuka.mobile.android.goedkooptanken.exception.LocationException;
 import com.nagazuka.mobile.android.goedkooptanken.service.LocationService;
 
 public class AndroidLocationService implements LocationService {
-
+ 
 	private static final String TAG = AndroidLocationService.class.getName();
 
 	@Override

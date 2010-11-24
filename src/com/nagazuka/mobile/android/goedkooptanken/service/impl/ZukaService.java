@@ -84,11 +84,11 @@ public class ZukaService implements DownloadService, UploadService {
 		try {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpGet request = new HttpGet(constructURL(params));
-			Log.d(TAG, "<< HTTP Request: " + request.toString());
+			//Log.d(TAG, "<< HTTP Request: " + request.toString());
 
 			ResponseHandler<String> handler = new BasicResponseHandler();
 			response = httpClient.execute(request, handler);
-			Log.d(TAG, "<< HTTP Response: " + response);
+			//Log.d(TAG, "<< HTTP Response: " + response);
 
 			httpClient.getConnectionManager().shutdown();
 		} catch (ClientProtocolException c) {
@@ -178,7 +178,7 @@ public class ZukaService implements DownloadService, UploadService {
 			double lng = Double.valueOf(lngStr);
 			point = new GeoPoint((int) (lat * 1E6), (int) (lng * 1E6));
 			
-			Log.d(TAG, "Parsed lat/lng [" + lat + "] [" + lng + "]");
+			//Log.d(TAG, "Parsed lat/lng [" + lat + "] [" + lng + "]");
 		} catch (Exception e) {
 			Log.e(TAG, "Can not parse lat/lng in place response: [" + latStr
 					+ "] [" + lngStr + "]");
@@ -212,11 +212,11 @@ public class ZukaService implements DownloadService, UploadService {
 		try {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpGet request = new HttpGet(constructURL(params));
-			Log.d(TAG, "<< HTTP Request: " + request.toString());
+			//Log.d(TAG, "<< HTTP Request: " + request.toString());
 
 			ResponseHandler<String> handler = new BasicResponseHandler();
 			response = httpClient.execute(request, handler);
-			Log.d(TAG, "<< HTTP Response: " + response);
+			//Log.d(TAG, "<< HTTP Response: " + response);
 
 			httpClient.getConnectionManager().shutdown();
 		} catch (ClientProtocolException c) {
