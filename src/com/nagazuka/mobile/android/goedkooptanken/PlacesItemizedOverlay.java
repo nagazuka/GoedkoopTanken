@@ -15,13 +15,14 @@
        KIND, either express or implied.  See the License for the
        specific language governing permissions and limitations
        under the License.
-*/
+ */
 package com.nagazuka.mobile.android.goedkooptanken;
 
 import java.util.ArrayList;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 
 import com.google.android.maps.ItemizedOverlay;
@@ -30,7 +31,7 @@ import com.google.android.maps.OverlayItem;
 public class PlacesItemizedOverlay extends ItemizedOverlay<OverlayItem> {
 	private ArrayList<OverlayItem> mOverlays = new ArrayList<OverlayItem>();
 	private Context mContext;
-	
+
 	public PlacesItemizedOverlay(Drawable defaultMarker) {
 		super(boundCenterBottom(defaultMarker));
 	}
@@ -40,17 +41,30 @@ public class PlacesItemizedOverlay extends ItemizedOverlay<OverlayItem> {
 		mContext = context;
 	}
 
-	
 	@Override
 	protected boolean onTap(int index) {
-	  OverlayItem item = mOverlays.get(index);
-	  AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
-	  dialog.setTitle(item.getTitle());
-	  dialog.setMessage(item.getSnippet());
-	  dialog.show();
-	  return true;
-	}
+		OverlayItem item = mOverlays.get(index);
 
+		DialogInterface.OnClickListener maps = new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				dialog.dismiss();
+			}
+		};
+
+		DialogInterface.OnClickListener navigation = new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				dialog.dismiss();
+			}
+		};
+
+		AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
+		dialog.setTitle(item.getTitle());
+		dialog.setMessage(item.getSnippet());
+		dialog.setPositiveButton(R.string.maps_button_label, maps);
+		dialog.setNegativeButton(R.string.navigation_button_label, navigation);
+		dialog.show();
+		return true;
+	}
 
 	@Override
 	protected OverlayItem createItem(int i) {

@@ -63,6 +63,7 @@ import com.nagazuka.mobile.android.goedkooptanken.service.LocationService;
 import com.nagazuka.mobile.android.goedkooptanken.service.impl.AndroidLocationService;
 import com.nagazuka.mobile.android.goedkooptanken.service.impl.GoogleHttpGeocodingService;
 import com.nagazuka.mobile.android.goedkooptanken.service.impl.ZukaService;
+import com.nagazuka.mobile.android.goedkooptanken.util.PlacesUtil;
 
 public class PlacesListActivity extends ListActivity {
 
@@ -239,10 +240,10 @@ public class PlacesListActivity extends ListActivity {
 				.getMenuInfo();
 		switch (item.getItemId()) {
 		case CONTEXT_MENU_MAPS_ID:
-			openItemInGoogleMaps(info.position, false);
+			openItemInGoogleMaps(info.position);
 			return true;
 		case CONTEXT_MENU_NAVIGATION_ID:
-			openItemInGoogleMaps(info.position, true);
+			openItemInGoogleNavigation(info.position);			
 			return true;
 		case CONTEXT_MENU_DETAILS_ID:
 			showDetailsDialog(info.position);
@@ -252,11 +253,18 @@ public class PlacesListActivity extends ListActivity {
 		}
 	}
 
-	private void openItemInGoogleMaps(int position, boolean navigation) {
+	private void openItemInGoogleMaps(int position) {
 		if (m_places != null) {
-			Place selectedItem = m_places.get(position);
-			Uri geoUri = createGeoURI(selectedItem, navigation);
-			Intent mapCall = new Intent(Intent.ACTION_VIEW, geoUri);
+			Place selectedItem = m_places.get(position);			
+			Intent mapCall = PlacesUtil.getGoogleMapsIntent(selectedItem); 
+			startActivity(mapCall);
+		}
+	}
+	
+	private void openItemInGoogleNavigation(int position) {
+		if (m_places != null) {
+			Place selectedItem = m_places.get(position);			
+			Intent mapCall = PlacesUtil.getGoogleNavigationIntent(selectedItem); 
 			startActivity(mapCall);
 		}
 	}
@@ -276,21 +284,6 @@ public class PlacesListActivity extends ListActivity {
 			new AlertDialog.Builder(PlacesListActivity.this).setTitle(title)
 					.setMessage(summary).setPositiveButton("OK", back).show();
 		}
-	}
-
-	private Uri createGeoURI(Place selectedItem, boolean navigation) {
-		String geoUriString;
-		if (!navigation) {
-			geoUriString = "geo:0,0?q=Nederland, ";
-		} else {
-			geoUriString = "google.navigation:q=Nederland, ";
-		}
-
-		geoUriString += selectedItem.getAddress() + ", "
-				+ selectedItem.getPostalCode() + "," + selectedItem.getTown();
-		Log.d(TAG, "<< Geo Uri String [" + geoUriString + "]");
-		Uri geoUri = Uri.parse(geoUriString);
-		return geoUri;
 	}
 
 	private void showExceptionAlert(String message, Exception e, int taskType) {
@@ -334,12 +327,6 @@ public class PlacesListActivity extends ListActivity {
 			final String settingsType, final String buttonText) {
 		Resources res = getResources();
 
-		DialogInterface.OnClickListener back = new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				PlacesListActivity.this.finish();
-			}
-		};
-
 		DialogInterface.OnClickListener settings = new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
 				Intent intent = new Intent(settingsType);
@@ -367,8 +354,6 @@ public class PlacesListActivity extends ListActivity {
 
 		new AlertDialog.Builder(PlacesListActivity.this).setTitle(
 				res.getString(R.string.error_alert_title)).setMessage(message)
-				//.setNegativeButton(
-				//		res.getString(R.string.error_alert_neg_button), back)
 				.setNeutralButton(buttonText, settings).setPositiveButton(
 						R.string.error_alert_retry_button, retry).show();
 	}
