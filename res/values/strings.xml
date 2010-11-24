@@ -26,4 +26,6 @@
 	<string name="sort_price">Sorteren op prijs</string>
 	<string name="sort_distance">Sorteren op afstand</string>
 	<string name="search_postalcode">Zoeken op postcode</string>
+	<string name="maps_button_label">Maps</string>
+	<string name="navigation_button_label">Navigatie</string>
 </resources>
