@@ -19,8 +19,13 @@
 package com.nagazuka.mobile.android.goedkooptanken;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -30,6 +35,7 @@ import android.util.Log;
 
 import com.flurry.android.FlurryAgent;
 import com.google.android.maps.GeoPoint;
+import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
@@ -37,9 +43,8 @@ import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 import com.nagazuka.mobile.android.goedkooptanken.service.GeocodingService;
-import com.nagazuka.mobile.android.goedkooptanken.service.UploadService;
 import com.nagazuka.mobile.android.goedkooptanken.service.impl.AndroidGeocodingService;
-import com.nagazuka.mobile.android.goedkooptanken.service.impl.ZukaService;
+import com.nagazuka.mobile.android.goedkooptanken.util.PlacesUtil;
 
 public class PlacesMapActivity extends MapActivity {
 
@@ -106,7 +111,7 @@ public class PlacesMapActivity extends MapActivity {
 			OverlayItem overlayitem = new OverlayItem(point,
 					currentLocationTitle, currentLocationText);
 
-			userOverlay.addOverlay(overlayitem);
+			userOverlay.addOverlay(overlayitem);			
 			mapOverlays.add(userOverlay);
 
 			mc.setZoom(13);
@@ -132,8 +137,6 @@ public class PlacesMapActivity extends MapActivity {
 	   super.onStop();
 	   FlurryAgent.onEndSession(this);
 	}
-
-
 
 	@Override
 	protected boolean isRouteDisplayed() {
@@ -180,28 +183,25 @@ public class PlacesMapActivity extends MapActivity {
 		@Override
 		protected void onProgressUpdate(Place... progress) {
 			Place p = progress[0];
-			GeoPoint point = p.getPoint();
-
-			OverlayItem overlayitem = new OverlayItem(point, p.getName(), p
-					.getSummary());
+			
 			switch (p.getPriceIndicator()) {
 			case Place.CHEAP:
 				if (!placedFirstCheapMarker) {
 					mapOverlays.add(itemizedoverlayCheap);
 				}
-				itemizedoverlayCheap.addOverlay(overlayitem);
+				itemizedoverlayCheap.addOverlay(p);
 				break;
 			case Place.NORMAL:
 				if (!placedFirstNormalMarker) {
 					mapOverlays.add(itemizedoverlayNormal);
 				}
-				itemizedoverlayNormal.addOverlay(overlayitem);
+				itemizedoverlayNormal.addOverlay(p);
 				break;
 			case Place.EXPENSIVE:
 				if (!placedFirstExpensiveMarker) {
 					mapOverlays.add(itemizedoverlayExpensive);
 				}
-				itemizedoverlayExpensive.addOverlay(overlayitem);
+				itemizedoverlayExpensive.addOverlay(p);
 				break;				
 			default:
 				Log.e(TAG, "Unknown price indicator [" + p.getPriceIndicator()
@@ -218,40 +218,73 @@ public class PlacesMapActivity extends MapActivity {
 		}
 	}
 
-	private class UploadTask extends AsyncTask<Void, Place, Void> {
+	public class PlacesItemizedOverlay extends ItemizedOverlay<OverlayItem> {
+		private ArrayList<OverlayItem> mOverlays = new ArrayList<OverlayItem>();
+		private HashMap<Integer,Place> mPlaces = new HashMap<Integer,Place>();
+		
+		private Context mContext;
 
-		private UploadService m_uploadService = null;
+		public PlacesItemizedOverlay(Drawable defaultMarker) {
+			super(boundCenterBottom(defaultMarker));
+		}
 
-		@Override
-		public void onPreExecute() {
-			m_uploadService = new ZukaService();
+		public PlacesItemizedOverlay(Drawable defaultMarker, Context context) {
+			super(boundCenterBottom(defaultMarker));
+			mContext = context;
 		}
 
 		@Override
-		protected Void doInBackground(Void... params) {
-			try {
-				List<Place> places = app.getPlaces();
-				List<Place> uploadPlacesList = new ArrayList<Place>();
-				for (Place p : places) {
-					if (p.getPoint() != null) {
-						uploadPlacesList.add(p);
-					}
+		protected boolean onTap(int index) {
+			OverlayItem item = mOverlays.get(index);
+			final Place p = mPlaces.get(index);
+			DialogInterface.OnClickListener maps = new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					Intent mapCall = PlacesUtil.getGoogleMapsIntent(p);
+					startActivity(mapCall);
+					dialog.dismiss();
 				}
-				m_uploadService.uploadPlaces(uploadPlacesList);
-			} catch (Exception e) {
-				Log.e(TAG, "Unexpected exception in UploadTask"
-						+ e.getMessage());
-				e.printStackTrace();
-			}
-			return null;
+			};
+
+			DialogInterface.OnClickListener navigation = new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					Intent navCall = PlacesUtil.getGoogleNavigationIntent(p);
+					startActivity(navCall);
+					dialog.dismiss();
+				}
+			};
+
+			AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
+			dialog.setTitle(item.getTitle());
+			dialog.setMessage(item.getSnippet());
+			dialog.setPositiveButton(R.string.maps_button_label, maps);
+			dialog.setNegativeButton(R.string.navigation_button_label, navigation);
+			dialog.show();
+			return true;
 		}
 
 		@Override
-		protected void onProgressUpdate(Place... progress) {
+		protected OverlayItem createItem(int i) {
+			return mOverlays.get(i);
 		}
 
 		@Override
-		protected void onPostExecute(Void result) {
+		public int size() {
+			return mOverlays.size();
+		}
+		
+		public void addOverlay(Place p) {
+			GeoPoint point = p.getPoint();
+			OverlayItem overlayitem = new OverlayItem(point, p.getName(), p
+					.getSummary());
+			
+			this.addOverlay(overlayitem);			
+			int overlayIndex = mOverlays.indexOf(overlayitem);
+			mPlaces.put(overlayIndex, p);
+		}
+
+		public void addOverlay(OverlayItem overlay) {
+			mOverlays.add(overlay);			
+			populate();
 		}
 	}
 }
