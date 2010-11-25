@@ -59,9 +59,8 @@ public class PlacesMapActivity extends MapActivity {
 	private Drawable pinDrawableExpensive = null;
 	private Drawable pinDrawableNormal = null;
 	private Drawable userDrawable = null;
-	private PlacesItemizedOverlay itemizedoverlayCheap = null;
-	private PlacesItemizedOverlay itemizedoverlayNormal = null;
-	private PlacesItemizedOverlay itemizedoverlayExpensive = null;
+	
+	private HashMap<Integer,PlacesItemizedOverlay> itemizedOverlays = new HashMap<Integer, PlacesItemizedOverlay>();
 	private PlacesItemizedOverlay userOverlay = null;
 
 	/** Called when the activity is first created. */
@@ -97,13 +96,14 @@ public class PlacesMapActivity extends MapActivity {
 			userDrawable = this.getResources().getDrawable(R.drawable.ic_robot);
 
 			userOverlay = new PlacesItemizedOverlay(userDrawable, this);
-			itemizedoverlayCheap = new PlacesItemizedOverlay(pinDrawableCheap,
-					this);
-			itemizedoverlayNormal = new PlacesItemizedOverlay(
-					pinDrawableNormal, this);
-			itemizedoverlayExpensive = new PlacesItemizedOverlay(
-					pinDrawableExpensive, this);
-
+			
+			itemizedOverlays.put(Place.CHEAP, new PlacesItemizedOverlay(pinDrawableCheap,
+					this));
+			itemizedOverlays.put(Place.NORMAL, new PlacesItemizedOverlay(pinDrawableNormal,
+					this));
+			itemizedOverlays.put(Place.EXPENSIVE, new PlacesItemizedOverlay(pinDrawableExpensive,
+					this));
+			
 			String currentLocationTitle = getResources().getString(
 					R.string.current_location_title);
 			String currentLocationText = getResources().getString(
@@ -145,12 +145,14 @@ public class PlacesMapActivity extends MapActivity {
 
 	private class GeocodeTask extends AsyncTask<Void, Place, Void> {
 
-		private boolean placedFirstNormalMarker = false;
-		private boolean placedFirstCheapMarker = false;
-		private boolean placedFirstExpensiveMarker = false;
+		private HashMap<Integer, Boolean> placedFirstMarker;
 
 		@Override
 		public void onPreExecute() {
+			placedFirstMarker = new HashMap<Integer, Boolean>();
+			placedFirstMarker.put(Place.CHEAP, Boolean.FALSE);
+			placedFirstMarker.put(Place.NORMAL, Boolean.FALSE);
+			placedFirstMarker.put(Place.EXPENSIVE, Boolean.FALSE);
 		}
 
 		@Override
@@ -184,31 +186,13 @@ public class PlacesMapActivity extends MapActivity {
 		protected void onProgressUpdate(Place... progress) {
 			Place p = progress[0];
 			
-			switch (p.getPriceIndicator()) {
-			case Place.CHEAP:
-				if (!placedFirstCheapMarker) {
-					mapOverlays.add(itemizedoverlayCheap);
-				}
-				itemizedoverlayCheap.addOverlay(p);
-				break;
-			case Place.NORMAL:
-				if (!placedFirstNormalMarker) {
-					mapOverlays.add(itemizedoverlayNormal);
-				}
-				itemizedoverlayNormal.addOverlay(p);
-				break;
-			case Place.EXPENSIVE:
-				if (!placedFirstExpensiveMarker) {
-					mapOverlays.add(itemizedoverlayExpensive);
-				}
-				itemizedoverlayExpensive.addOverlay(p);
-				break;				
-			default:
-				Log.e(TAG, "Unknown price indicator [" + p.getPriceIndicator()
-						+ "]");
-				break;
+			int priceIndicator = p.getPriceIndicator();
+			PlacesItemizedOverlay overlay = itemizedOverlays.get(priceIndicator);			
+			if (!placedFirstMarker.get(priceIndicator)) {
+				mapOverlays.add(overlay);
+				placedFirstMarker.put(priceIndicator, Boolean.TRUE);
 			}
-
+			overlay.addOverlay(p);
 			mapView.invalidate();
 		}
 
@@ -282,7 +266,7 @@ public class PlacesMapActivity extends MapActivity {
 			mPlaces.put(overlayIndex, p);
 		}
 
-		public void addOverlay(OverlayItem overlay) {
+		private void addOverlay(OverlayItem overlay) {			
 			mOverlays.add(overlay);			
 			populate();
 		}
