@@ -15,7 +15,7 @@
        KIND, either express or implied.  See the License for the
        specific language governing permissions and limitations
        under the License.
-*/
+ */
 package com.nagazuka.mobile.android.goedkooptanken;
 
 import java.util.ArrayList;
@@ -54,14 +54,11 @@ public class PlacesMapActivity extends MapActivity {
 	private MapView mapView;
 
 	private GeocodingService m_geocodingService = new AndroidGeocodingService();;
-	private List<Overlay> mapOverlays = null;
-	private Drawable pinDrawableCheap = null;
-	private Drawable pinDrawableExpensive = null;
-	private Drawable pinDrawableNormal = null;
-	private Drawable userDrawable = null;
-	
-	private HashMap<Integer,PlacesItemizedOverlay> itemizedOverlays = new HashMap<Integer, PlacesItemizedOverlay>();
-	private PlacesItemizedOverlay userOverlay = null;
+	private List<Overlay> m_mapOverlays = null;
+	private Drawable m_userDrawable = null;
+	private HashMap<Integer, Drawable> m_pinDrawables = new HashMap<Integer, Drawable>();
+	private HashMap<Integer, PlacesItemizedOverlay> m_itemizedOverlays = new HashMap<Integer, PlacesItemizedOverlay>();
+	private PlacesItemizedOverlay m_userOverlay = null;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -85,25 +82,22 @@ public class PlacesMapActivity extends MapActivity {
 			GeoPoint point = new GeoPoint((int) (latitude * 1E6),
 					(int) (longitude * 1E6));
 
-			mapOverlays = mapView.getOverlays();
-			pinDrawableCheap = this.getResources().getDrawable(
-					R.drawable.map_pin_green);
-			pinDrawableNormal = this.getResources().getDrawable(
-					R.drawable.map_pin);
-			pinDrawableExpensive = this.getResources().getDrawable(
-					R.drawable.map_pin_red);
+			m_mapOverlays = mapView.getOverlays();
 
-			userDrawable = this.getResources().getDrawable(R.drawable.ic_robot);
+			m_pinDrawables.put(Place.CHEAP, getResources().getDrawable(
+					R.drawable.map_pin_green));
+			m_pinDrawables.put(Place.NORMAL, getResources().getDrawable(
+					R.drawable.map_pin));
+			m_pinDrawables.put(Place.EXPENSIVE, getResources().getDrawable(
+					R.drawable.map_pin_red));
 
-			userOverlay = new PlacesItemizedOverlay(userDrawable, this);
-			
-			itemizedOverlays.put(Place.CHEAP, new PlacesItemizedOverlay(pinDrawableCheap,
-					this));
-			itemizedOverlays.put(Place.NORMAL, new PlacesItemizedOverlay(pinDrawableNormal,
-					this));
-			itemizedOverlays.put(Place.EXPENSIVE, new PlacesItemizedOverlay(pinDrawableExpensive,
-					this));
-			
+			m_userDrawable = this.getResources().getDrawable(R.drawable.ic_robot);
+			m_userOverlay = new PlacesItemizedOverlay(m_userDrawable, this);
+
+			addItemizedOverlay(Place.CHEAP);
+			addItemizedOverlay(Place.NORMAL);
+			addItemizedOverlay(Place.EXPENSIVE);
+
 			String currentLocationTitle = getResources().getString(
 					R.string.current_location_title);
 			String currentLocationText = getResources().getString(
@@ -111,8 +105,8 @@ public class PlacesMapActivity extends MapActivity {
 			OverlayItem overlayitem = new OverlayItem(point,
 					currentLocationTitle, currentLocationText);
 
-			userOverlay.addOverlay(overlayitem);			
-			mapOverlays.add(userOverlay);
+			m_userOverlay.addOverlay(overlayitem);
+			m_mapOverlays.add(m_userOverlay);
 
 			mc.setZoom(13);
 			mc.animateTo(point);
@@ -121,21 +115,26 @@ public class PlacesMapActivity extends MapActivity {
 			new GeocodeTask().execute();
 		}
 	}
-	
-	@Override
-	public void onStart()
-	{
-	   super.onStart();
-	   Resources res = getResources();
-	   FlurryAgent.onStartSession(this, res.getString(R.string.flurry_key));
-       FlurryAgent.onEvent("Start MapActivity");
+
+	private void addItemizedOverlay(int priceIndicator) {
+		Drawable pinDrawable = m_pinDrawables.get(priceIndicator);
+		PlacesItemizedOverlay overlay = new PlacesItemizedOverlay(pinDrawable,
+				this);
+		m_itemizedOverlays.put(priceIndicator, overlay);
 	}
 
 	@Override
-	public void onStop()
-	{
-	   super.onStop();
-	   FlurryAgent.onEndSession(this);
+	public void onStart() {
+		super.onStart();
+		Resources res = getResources();
+		FlurryAgent.onStartSession(this, res.getString(R.string.flurry_key));
+		FlurryAgent.onEvent("Start MapActivity");
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+		FlurryAgent.onEndSession(this);
 	}
 
 	@Override
@@ -185,11 +184,12 @@ public class PlacesMapActivity extends MapActivity {
 		@Override
 		protected void onProgressUpdate(Place... progress) {
 			Place p = progress[0];
-			
+
 			int priceIndicator = p.getPriceIndicator();
-			PlacesItemizedOverlay overlay = itemizedOverlays.get(priceIndicator);			
+			PlacesItemizedOverlay overlay = m_itemizedOverlays
+					.get(priceIndicator);
 			if (!placedFirstMarker.get(priceIndicator)) {
-				mapOverlays.add(overlay);
+				m_mapOverlays.add(overlay);
 				placedFirstMarker.put(priceIndicator, Boolean.TRUE);
 			}
 			overlay.addOverlay(p);
@@ -204,8 +204,8 @@ public class PlacesMapActivity extends MapActivity {
 
 	public class PlacesItemizedOverlay extends ItemizedOverlay<OverlayItem> {
 		private ArrayList<OverlayItem> mOverlays = new ArrayList<OverlayItem>();
-		private HashMap<Integer,Place> mPlaces = new HashMap<Integer,Place>();
-		
+		private HashMap<Integer, Place> mPlaces = new HashMap<Integer, Place>();
+
 		private Context mContext;
 
 		public PlacesItemizedOverlay(Drawable defaultMarker) {
@@ -241,7 +241,8 @@ public class PlacesMapActivity extends MapActivity {
 			dialog.setTitle(item.getTitle());
 			dialog.setMessage(item.getSnippet());
 			dialog.setPositiveButton(R.string.maps_button_label, maps);
-			dialog.setNegativeButton(R.string.navigation_button_label, navigation);
+			dialog.setNegativeButton(R.string.navigation_button_label,
+					navigation);
 			dialog.show();
 			return true;
 		}
@@ -255,19 +256,19 @@ public class PlacesMapActivity extends MapActivity {
 		public int size() {
 			return mOverlays.size();
 		}
-		
+
 		public void addOverlay(Place p) {
 			GeoPoint point = p.getPoint();
 			OverlayItem overlayitem = new OverlayItem(point, p.getName(), p
 					.getSummary());
-			
-			this.addOverlay(overlayitem);			
+
+			this.addOverlay(overlayitem);
 			int overlayIndex = mOverlays.indexOf(overlayitem);
 			mPlaces.put(overlayIndex, p);
 		}
 
-		private void addOverlay(OverlayItem overlay) {			
-			mOverlays.add(overlay);			
+		private void addOverlay(OverlayItem overlay) {
+			mOverlays.add(overlay);
 			populate();
 		}
 	}
