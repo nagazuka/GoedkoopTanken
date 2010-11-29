@@ -100,11 +100,12 @@ public class PlacesListActivity extends ListActivity {
 
 		app = (GoedkoopTankenApp) getApplication();
 		m_places = app.getPlaces();
-
+		stopTasks();
+		
 		if (m_places != null) {
 			m_adapter = new PlacesAdapter(this, R.layout.row, m_places);
 			setListAdapter(m_adapter);
-		} else {
+		} else {			
 			ListView listView = getListView();
 			listView.setTextFilterEnabled(true);
 
@@ -354,16 +355,19 @@ public class PlacesListActivity extends ListActivity {
 	}
 	
 	private void startLocationTask() {
+		stopLocationTask();
 		m_locationTask = new LocationTask();
 		m_locationTask.execute();
 	}
 	
 	private void startGeocodeTask() {
+		stopGeocodeTask();
 		m_geocodeTask = new GeocodeTask();
 		m_geocodeTask.execute();
 	}
 
 	private void startDownloadTask() {
+		stopDownloadTask();
 		m_downloadTask = new DownloadTask();
 		m_downloadTask.execute();
 	}
