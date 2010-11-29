@@ -33,7 +33,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.location.Location;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -71,8 +70,8 @@ public class PlacesListActivity extends ListActivity {
 
 	private GoedkoopTankenApp app;
 	private PlacesAdapter m_adapter;
-	private PlaceDistanceComparator distanceComparator = new PlaceDistanceComparator();
-	private PlacePriceDistanceComparator priceDistanceComparator = new PlacePriceDistanceComparator();
+	private static PlaceDistanceComparator m_distanceComparator = new PlaceDistanceComparator();
+	private static PlacePriceDistanceComparator m_priceDistanceComparator = new PlacePriceDistanceComparator();
 
 	private ProgressDialog m_progressDialog;
 
@@ -80,7 +79,6 @@ public class PlacesListActivity extends ListActivity {
 
 	private static final int DIALOG_PROGRESS = 1;
 	private static final int DIALOG_SEARCH = 2;
-
 	private static final int MAX_PROGRESS = 100;
 
 	private static final int CONTEXT_MENU_MAPS_ID = 0;
@@ -90,6 +88,10 @@ public class PlacesListActivity extends ListActivity {
 	private static final int LOCATION_TASK = 0;
 	private static final int DOWNLOAD_TASK = 1;
 	private static final int GEOCODE_TASK = 2;
+	
+	private LocationTask m_locationTask = null;
+	private DownloadTask m_downloadTask = null;
+	private GeocodeTask m_geocodeTask = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -109,7 +111,7 @@ public class PlacesListActivity extends ListActivity {
 			m_places = new ArrayList<Place>();
 			m_adapter = new PlacesAdapter(this, R.layout.row, m_places);
 			setListAdapter(m_adapter);
-			new LocationTask().execute();
+			startLocationTask();
 		}
 		registerForContextMenu(getListView());
 		
@@ -123,13 +125,6 @@ public class PlacesListActivity extends ListActivity {
 	   Resources res = getResources();
 	   FlurryAgent.onStartSession(this, res.getString(R.string.flurry_key));
        FlurryAgent.onEvent("Start ListActivity");
-	}
-
-	@Override
-	public void onStop()
-	{
-	   super.onStop();
-	   FlurryAgent.onEndSession(this);
 	}
 
 	@Override
@@ -212,11 +207,11 @@ public class PlacesListActivity extends ListActivity {
 		// Handle item selection
 		switch (item.getItemId()) {
 		case R.id.sort_distance:
-			Collections.sort(m_places, distanceComparator);
+			Collections.sort(m_places, m_distanceComparator);
 			m_adapter.notifyDataSetChanged();
 			return true;
 		case R.id.sort_price:
-			Collections.sort(m_places, priceDistanceComparator);
+			Collections.sort(m_places, m_priceDistanceComparator);
 			m_adapter.notifyDataSetChanged();
 			return true;
 		case R.id.search_postalcode:
@@ -338,13 +333,13 @@ public class PlacesListActivity extends ListActivity {
 			public void onClick(DialogInterface dialog, int id) {
 				switch (taskType) {
 				case LOCATION_TASK:
-					new LocationTask().execute();
+					startLocationTask();
 					break;
 				case DOWNLOAD_TASK:
-					new DownloadTask().execute();
+					startDownloadTask();
 					break;
 				case GEOCODE_TASK:
-					new GeocodeTask().execute();
+					startGeocodeTask();
 					break;
 				default:
 					break;
@@ -356,6 +351,67 @@ public class PlacesListActivity extends ListActivity {
 				res.getString(R.string.error_alert_title)).setMessage(message)
 				.setNeutralButton(buttonText, settings).setPositiveButton(
 						R.string.error_alert_retry_button, retry).show();
+	}
+	
+	private void startLocationTask() {
+		m_locationTask = new LocationTask();
+		m_locationTask.execute();
+	}
+	
+	private void startGeocodeTask() {
+		m_geocodeTask = new GeocodeTask();
+		m_geocodeTask.execute();
+	}
+
+	private void startDownloadTask() {
+		m_downloadTask = new DownloadTask();
+		m_downloadTask.execute();
+	}
+	
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopTasks();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FlurryAgent.onEndSession(this);
+        stopTasks();
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopTasks();
+    }
+
+	private void stopTasks() {
+		stopLocationTask();
+		stopGeocodeTask();
+		stopDownloadTask();
+	}
+
+	private void stopDownloadTask() {
+		if (m_downloadTask != null && m_downloadTask.getStatus() != DownloadTask.Status.FINISHED) {
+			m_downloadTask.cancel(true);
+			m_downloadTask = null;
+        }
+	}
+
+	private void stopGeocodeTask() {
+		if (m_geocodeTask != null && m_geocodeTask.getStatus() != GeocodeTask.Status.FINISHED) {
+			m_geocodeTask.cancel(true);
+			m_geocodeTask = null;
+        }
+	}
+
+	private void stopLocationTask() {
+		if (m_locationTask != null && m_locationTask.getStatus() != LocationTask.Status.FINISHED) {
+        	m_locationTask.cancel(true);
+        	m_locationTask = null;
+        }
 	}
 
 	private class LocationTask extends AsyncTask<Void, Integer, Location> {
@@ -425,7 +481,7 @@ public class PlacesListActivity extends ListActivity {
 		private Exception m_exception = null;
 		private GeocodingService m_geocodingService = null;
 		private int progress = (int) (MAX_PROGRESS * 0.33);
-		private final int MAX_RETRY = 3;		
+		private static final int MAX_RETRY = 3;		
 		
 		@Override
 		public void onPreExecute() {
