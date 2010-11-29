@@ -82,32 +82,10 @@ public class PlacesMapActivity extends MapActivity {
 			GeoPoint point = new GeoPoint((int) (latitude * 1E6),
 					(int) (longitude * 1E6));
 
-			m_mapOverlays = mapView.getOverlays();
-
-			m_pinDrawables.put(Place.CHEAP, getResources().getDrawable(
-					R.drawable.map_pin_green));
-			m_pinDrawables.put(Place.NORMAL, getResources().getDrawable(
-					R.drawable.map_pin));
-			m_pinDrawables.put(Place.EXPENSIVE, getResources().getDrawable(
-					R.drawable.map_pin_red));
-
-			m_userDrawable = this.getResources().getDrawable(R.drawable.ic_robot);
-			m_userOverlay = new PlacesItemizedOverlay(m_userDrawable, this);
-
-			addItemizedOverlay(Place.CHEAP);
-			addItemizedOverlay(Place.NORMAL);
-			addItemizedOverlay(Place.EXPENSIVE);
-
-			String currentLocationTitle = getResources().getString(
-					R.string.current_location_title);
-			String currentLocationText = getResources().getString(
-					R.string.current_location_text);
-			OverlayItem overlayitem = new OverlayItem(point,
-					currentLocationTitle, currentLocationText);
-
-			m_userOverlay.addOverlay(overlayitem);
-			m_mapOverlays.add(m_userOverlay);
-
+			m_mapOverlays = mapView.getOverlays();			
+			addUserOverlay(point);
+			addPlacesOverlay();
+			
 			mc.setZoom(13);
 			mc.animateTo(point);
 
@@ -116,10 +94,39 @@ public class PlacesMapActivity extends MapActivity {
 		}
 	}
 
+	private void addUserOverlay(GeoPoint point) {
+		m_userDrawable = this.getResources().getDrawable(R.drawable.ic_robot);
+		m_userOverlay = new PlacesItemizedOverlay(m_userDrawable, this, false);
+		m_userOverlay.setGoogleButtonsVisisble(false);
+
+		String currentLocationTitle = getResources().getString(
+				R.string.current_location_title);
+		String currentLocationText = getResources().getString(
+				R.string.current_location_text);
+		OverlayItem overlayitem = new OverlayItem(point,
+				currentLocationTitle, currentLocationText);
+
+		m_userOverlay.addOverlay(overlayitem);
+		m_mapOverlays.add(m_userOverlay);
+	}
+
+	private void addPlacesOverlay() {
+		m_pinDrawables.put(Place.CHEAP, getResources().getDrawable(
+				R.drawable.map_pin_green));
+		m_pinDrawables.put(Place.NORMAL, getResources().getDrawable(
+				R.drawable.map_pin));
+		m_pinDrawables.put(Place.EXPENSIVE, getResources().getDrawable(
+				R.drawable.map_pin_red));
+
+		addItemizedOverlay(Place.CHEAP);
+		addItemizedOverlay(Place.NORMAL);
+		addItemizedOverlay(Place.EXPENSIVE);
+	}
+
 	private void addItemizedOverlay(int priceIndicator) {
 		Drawable pinDrawable = m_pinDrawables.get(priceIndicator);
 		PlacesItemizedOverlay overlay = new PlacesItemizedOverlay(pinDrawable,
-				this);
+				this, true);
 		m_itemizedOverlays.put(priceIndicator, overlay);
 	}
 
@@ -205,20 +212,23 @@ public class PlacesMapActivity extends MapActivity {
 	public class PlacesItemizedOverlay extends ItemizedOverlay<OverlayItem> {
 		private ArrayList<OverlayItem> mOverlays = new ArrayList<OverlayItem>();
 		private HashMap<Integer, Place> mPlaces = new HashMap<Integer, Place>();
-
+		private boolean googleButtonsVisible = false;
+		
 		private Context mContext;
 
-		public PlacesItemizedOverlay(Drawable defaultMarker) {
+		public PlacesItemizedOverlay(Drawable defaultMarker, boolean googleButtonsVisible) {
 			super(boundCenterBottom(defaultMarker));
+			this.googleButtonsVisible = googleButtonsVisible;
 		}
 
-		public PlacesItemizedOverlay(Drawable defaultMarker, Context context) {
+		public PlacesItemizedOverlay(Drawable defaultMarker, Context context, boolean googleButtonsVisible) {
 			super(boundCenterBottom(defaultMarker));
 			mContext = context;
+			this.googleButtonsVisible = googleButtonsVisible;			
 		}
 
 		@Override
-		protected boolean onTap(int index) {
+		protected boolean onTap(int index) {			
 			OverlayItem item = mOverlays.get(index);
 			final Place p = mPlaces.get(index);
 			DialogInterface.OnClickListener maps = new DialogInterface.OnClickListener() {
@@ -240,9 +250,13 @@ public class PlacesMapActivity extends MapActivity {
 			AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
 			dialog.setTitle(item.getTitle());
 			dialog.setMessage(item.getSnippet());
-			dialog.setPositiveButton(R.string.maps_button_label, maps);
-			dialog.setNegativeButton(R.string.navigation_button_label,
+			
+			if (areGoogleButtonsVisisble()) {
+				dialog.setPositiveButton(R.string.maps_button_label, maps);
+				dialog.setNegativeButton(R.string.navigation_button_label,
 					navigation);
+			}
+			
 			dialog.show();
 			return true;
 		}
@@ -270,6 +284,14 @@ public class PlacesMapActivity extends MapActivity {
 		private void addOverlay(OverlayItem overlay) {
 			mOverlays.add(overlay);
 			populate();
+		}
+
+		public boolean areGoogleButtonsVisisble() {
+			return googleButtonsVisible;
+		}
+
+		public void setGoogleButtonsVisisble(boolean googleButtonsVisisble) {
+			this.googleButtonsVisible = googleButtonsVisisble;
 		}
 	}
 }
