@@ -67,7 +67,7 @@ import com.nagazuka.mobile.android.goedkooptanken.util.PlacesUtil;
 public class PlacesListActivity extends ListActivity {
 
 	private static final String TAG = PlacesListActivity.class.getName();
-
+	
 	private GoedkoopTankenApp app;
 	private PlacesAdapter m_adapter;
 	private static PlaceDistanceComparator m_distanceComparator = new PlaceDistanceComparator();
@@ -92,6 +92,16 @@ public class PlacesListActivity extends ListActivity {
 	private LocationTask m_locationTask = null;
 	private DownloadTask m_downloadTask = null;
 	private GeocodeTask m_geocodeTask = null;
+	
+    private Status m_status = Status.INITIALIZING;
+
+    public enum Status {
+    	INITIALIZING,
+        FINDING_LOCATION,
+        GEOCODING_LOCATION,
+        DOWNLOADING_PLACES,
+        FINISHED
+    }	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -173,7 +183,7 @@ public class PlacesListActivity extends ListActivity {
 					imm.hideSoftInputFromWindow(edittext.getWindowToken(), 0);
 					if (inputString.length() == 4) {
 						app.setPostalCode(inputString);
-						new DownloadTask().execute();
+						startDownloadTask();
 					}
 					dialog.dismiss();
 				}
@@ -356,18 +366,21 @@ public class PlacesListActivity extends ListActivity {
 	
 	private void startLocationTask() {
 		stopLocationTask();
+		m_status = Status.FINDING_LOCATION;
 		m_locationTask = new LocationTask();
 		m_locationTask.execute();
 	}
 	
 	private void startGeocodeTask() {
 		stopGeocodeTask();
+		m_status = Status.GEOCODING_LOCATION;
 		m_geocodeTask = new GeocodeTask();
 		m_geocodeTask.execute();
 	}
 
 	private void startDownloadTask() {
 		stopDownloadTask();
+		m_status = Status.DOWNLOADING_PLACES;
 		m_downloadTask = new DownloadTask();
 		m_downloadTask.execute();
 	}
@@ -377,8 +390,32 @@ public class PlacesListActivity extends ListActivity {
         super.onPause();
         stopTasks();
     }
-
+    
     @Override
+    protected void onResume() {
+        super.onPause();
+        resumeTasks();
+    }
+
+    private void resumeTasks() {
+    	switch (m_status) {
+    	case INITIALIZING:
+    		break;
+    	case FINDING_LOCATION:
+    		startLocationTask();
+    		break;
+    	case GEOCODING_LOCATION:
+    		startGeocodeTask();
+    		break;
+    	case DOWNLOADING_PLACES:
+    		startDownloadTask();
+    		break;
+    	default:
+    		Log.e(TAG, "Cannot resume tasks because m_status = " + m_status);
+    	}
+	}
+
+	@Override
     protected void onStop() {
         super.onStop();
         FlurryAgent.onEndSession(this);
@@ -475,7 +512,7 @@ public class PlacesListActivity extends ListActivity {
 						null, LOCATION_TASK);
 			} else {
 				app.setLocation(location);
-				new GeocodeTask().execute();
+				startGeocodeTask();				
 			}
 		}
 	}
@@ -547,7 +584,7 @@ public class PlacesListActivity extends ListActivity {
 						null, GEOCODE_TASK);
 			} else {
 				app.setPostalCode(postalCode);
-				new DownloadTask().execute();
+				startDownloadTask();				
 			}
 		}
 	}
@@ -589,6 +626,8 @@ public class PlacesListActivity extends ListActivity {
 		protected void onPostExecute(List<Place> result) {
 			m_progressDialog.setProgress(MAX_PROGRESS);
 			m_progressDialog.dismiss();
+			
+			m_status = PlacesListActivity.Status.FINISHED;
 
 			if (m_exception != null) {
 				showExceptionAlert(m_exception.getMessage(), m_exception,
