@@ -181,7 +181,7 @@ public class ZukaService implements DownloadService, UploadService {
 			//Log.d(TAG, "Parsed lat/lng [" + lat + "] [" + lng + "]");
 		} catch (Exception e) {
 			Log.e(TAG, "Can not parse lat/lng in place response: [" + latStr
-					+ "] [" + lngStr + "]");
+					+ "] [" + lngStr + "]: " + e);
 		}
 
 		return point;

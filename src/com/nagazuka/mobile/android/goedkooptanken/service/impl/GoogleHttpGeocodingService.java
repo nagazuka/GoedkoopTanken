@@ -71,11 +71,13 @@ public class GoogleHttpGeocodingService implements GeocodingService {
 	public double[] getLocation(Place place) throws GoedkoopTankenException {
 		double[] result = { 0.0, 0.0 };
 
+		/*
 		int maxResults = 1;
 		String address = place.getAddress();
 		String postalCode = place.getPostalCode();
 		String town = place.getTown();
 		String locationName = address + ", " + postalCode + ", " + town;
+		*/
 
 		return result;
 	}

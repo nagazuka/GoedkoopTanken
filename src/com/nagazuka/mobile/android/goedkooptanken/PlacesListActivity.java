@@ -485,8 +485,9 @@ public class PlacesListActivity extends ListActivity {
 				location = m_locationService
 						.getCurrentLocation(m_locationManager);
 
-			} catch (Exception e) {
+			} catch (Exception e) {				
 				m_exception = e;
+				Log.e(TAG,"Exception occurred in LocationTask [doInBackground]: " + e);
 			}
 
 			return location;
@@ -612,6 +613,7 @@ public class PlacesListActivity extends ListActivity {
 				results = downloader.fetchPlaces(placesParams);
 			} catch (Exception e) {
 				m_exception = e;
+				Log.e(TAG,"Exception occurred in DownloadTask [doInBackground]: " + e);
 			}
 
 			return results;

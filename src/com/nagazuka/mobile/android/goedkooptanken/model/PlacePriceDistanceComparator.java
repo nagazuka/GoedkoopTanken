@@ -18,9 +18,10 @@
 */
 package com.nagazuka.mobile.android.goedkooptanken.model;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
-public class PlacePriceDistanceComparator implements Comparator<Place> {
+public class PlacePriceDistanceComparator implements Comparator<Place>, Serializable {
 
 	@Override
 	public int compare(Place p0, Place p1) {

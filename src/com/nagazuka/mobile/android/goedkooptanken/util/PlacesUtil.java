@@ -2,12 +2,10 @@ package com.nagazuka.mobile.android.goedkooptanken.util;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
 
 import com.nagazuka.mobile.android.goedkooptanken.model.Place;
 
 public class PlacesUtil {
-	private static final String TAG = PlacesUtil.class.getName();
 
 	public static Intent getGoogleMapsIntent(Place selectedItem) {
 		Uri geoUri = createGeoURI(selectedItem, false);

@@ -20,8 +20,6 @@ package com.nagazuka.mobile.android.goedkooptanken.model;
 
 import java.util.List;
 
-import android.util.Log;
-
 import com.google.android.maps.GeoPoint;
 
 public class Place {
